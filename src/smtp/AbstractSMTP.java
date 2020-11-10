@@ -12,14 +12,7 @@ import java.net.*;
  */
 public abstract class AbstractSMTP implements Runnable {
 
-	private DatagramSocket socket;
-	private int size;
 	private IThread runner;
-	
-	public AbstractSMTP(DatagramSocket socket, int size) {
-		this.socket = socket;
-		this.size = size;
-	}
 	
 	@Override
 	public abstract void run();
@@ -32,15 +25,4 @@ public abstract class AbstractSMTP implements Runnable {
 		return runner;
 	}
 	
-	public final DatagramPacket udpReceive() throws IOException {
-		DatagramPacket packet = new DatagramPacket(new byte[size], size);
-		socket.receive(packet);
-		return packet;
-	}
-	
-	public final void udpSend(String str, InetAddress addr, int port) throws IOException {
-		byte[] data = str.getBytes();
-		DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
-		socket.send(packet);
-	}
 }

@@ -15,15 +15,31 @@ import java.util.*;
  */
 public class SMTPServer extends AbstractSMTP {
 	
+	private DatagramSocket socket;
+	private int size;
+	
 	private HashMap<String, String> map;
 	private ISMTPState state;
 	
 	public SMTPServer(DatagramSocket socket, int size) {
-		super(socket, size);
+		this.socket = socket;
+		this.size = size;
 		
 		initHashMap();
 		setState(receiveCommand(this));
 		setState(ISMTPState.stateInitial(this));
+	}
+	
+	public DatagramPacket udpReceive() throws IOException {
+		DatagramPacket packet = new DatagramPacket(new byte[size], size);
+		socket.receive(packet);
+		return packet;
+	}
+	
+	public void udpSend(String str, InetAddress addr, int port) throws IOException {
+		byte[] data = str.getBytes();
+		DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
+		socket.send(packet);
 	}
 	
 	@Override

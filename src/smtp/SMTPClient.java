@@ -14,17 +14,33 @@ import java.net.*;
  */
 public class SMTPClient extends AbstractSMTP {
 	
+	private DatagramSocket socket;
+	private int size;
+	
 	private InetAddress addr;
 	private int port;
 	private BufferedReader reader;
 	
 	public SMTPClient(DatagramSocket socket, int size, int port, InetAddress addr) {
-		super(socket, size);
+		this.socket = socket;
+		this.size = size;
 		
 		this.addr = addr;
 		this.port = port;
 		
 		setState(sendCommand(this));
+	}
+	
+	public DatagramPacket udpReceive() throws IOException {
+		DatagramPacket packet = new DatagramPacket(new byte[size], size);
+		socket.receive(packet);
+		return packet;
+	}
+	
+	public void udpSend(String str, InetAddress addr, int port) throws IOException {
+		byte[] data = str.getBytes();
+		DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
+		socket.send(packet);
 	}
 	
 	@Override
