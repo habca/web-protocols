@@ -4,6 +4,10 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import main.IThread;
+import main.Main;
+import main.AThread;
+
 /**
  * Simple SMTP Server for TIES323
  * 
@@ -13,7 +17,7 @@ import java.util.*;
  * @version 5.11.2020, interface for runnable thread
  * @version 9.11.2020, uses abstract class
  */
-public class SMTPServer extends AbstractSMTP {
+public class SMTPServer extends AThread {
 	
 	private DatagramSocket socket;
 	private int size;
@@ -49,7 +53,7 @@ public class SMTPServer extends AbstractSMTP {
 				getState().run();
 			}
 		} catch (IOException e) {
-			SMTPMain.onerror(e);
+			Main.onerror(e);
 		}
 	}
 	

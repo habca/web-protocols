@@ -3,6 +3,8 @@ package pop3;
 import java.io.*;
 import java.net.*;
 
+import main.IThread;
+import main.Main;
 import smtp.*;
 
 public class POP3Client implements Runnable {
@@ -26,7 +28,7 @@ public class POP3Client implements Runnable {
 				runner.run();
 			}
 		} catch (IOException e) {
-			SMTPMain.onerror(e);
+			Main.onerror(e);
 		}
 	}
 	
@@ -59,7 +61,7 @@ public class POP3Client implements Runnable {
 				
 				String data = new String(tcpReceive());
 				
-				SMTPMain.onmessage(data);
+				Main.onmessage(data);
 			}
 			
 		};

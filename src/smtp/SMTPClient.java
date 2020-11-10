@@ -3,6 +3,10 @@ package smtp;
 import java.io.*;
 import java.net.*;
 
+import main.IThread;
+import main.Main;
+import main.AThread;
+
 /**
  * Simple SMTP Client for TIES323
  * 
@@ -12,7 +16,7 @@ import java.net.*;
  * @version 5.11.2020, interface for runnable threads
  * @version 9.11.2020, uses abstract class
  */
-public class SMTPClient extends AbstractSMTP {
+public class SMTPClient extends AThread {
 	
 	private DatagramSocket socket;
 	private int size;
@@ -51,7 +55,7 @@ public class SMTPClient extends AbstractSMTP {
 				getState().run();
 			}
 		} catch (IOException e) {
-			SMTPMain.onerror(e);
+			Main.onerror(e);
 		}
 	}
 	
@@ -70,7 +74,7 @@ public class SMTPClient extends AbstractSMTP {
 					setState(sendData(client));
 				}
 				
-				SMTPMain.onmessage(data);
+				Main.onmessage(data);
 			}
 		};
 	}
@@ -89,7 +93,7 @@ public class SMTPClient extends AbstractSMTP {
 					DatagramPacket packet = udpReceive();
 					String data = new String(packet.getData(), 0, packet.getLength());
 					
-					SMTPMain.onmessage(data);
+					Main.onmessage(data);
 				}
 			}
 		};
