@@ -23,15 +23,15 @@ public class SMTPMain {
 		Runnable server = new SMTPServer(ssocket, size);
 		new Thread(server).start();
 		
-		/*
 		DatagramSocket csocket = new DatagramSocket(cport, addr);
 		Runnable client = new SMTPClient(csocket, size, sport, addr);
 		new Thread(client).start();
-		*/
 		
+		/*
 		Socket csocket = new Socket(addr, tport);
 		Runnable client = new POP3Client(csocket);
 		new Thread(client).start();
+		*/
 	}
 
 	public static void onmessage(String str) {
