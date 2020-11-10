@@ -3,9 +3,9 @@ package smtp;
 import java.io.*;
 import java.net.*;
 
-import main.IThread;
 import main.Main;
-import main.AThread;
+import thread.AThread;
+import thread.IThread;
 
 /**
  * Simple SMTP Client for TIES323

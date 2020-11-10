@@ -22,8 +22,8 @@ public class Server {
 		//server.setInbox(inbox);
 	}
 		
-	public void servicePOP3(int port) throws IOException {
-		Runnable server = new POP3Server(port);
+	public void servicePOP3(int tport) throws IOException {
+		Runnable server = new POP3Server(tport);
 		new Thread(server).start();
 		
 		//server.setInbox(inbox);

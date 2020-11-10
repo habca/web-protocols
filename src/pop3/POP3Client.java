@@ -3,14 +3,14 @@ package pop3;
 import java.io.*;
 import java.net.*;
 
-import main.IThread;
-import main.Main;
+import main.*;
 import smtp.*;
+import thread.AThread;
+import thread.IThread;
 
-public class POP3Client implements Runnable {
+public class POP3Client extends AThread {
 
 	private Socket socket;
-	private IThread runner;
 	
 	private BufferedReader reader;
 	
@@ -25,19 +25,11 @@ public class POP3Client implements Runnable {
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in)) ) {
 			reader = in;
 			while (true) {
-				runner.run();
+				getState().run();
 			}
 		} catch (IOException e) {
 			Main.onerror(e);
 		}
-	}
-	
-	public final void setState(IThread state) {
-		runner = state;
-	}
-	
-	public final IThread getState() {
-		return runner;
 	}
 	
 	public final String tcpReceive() throws IOException {
@@ -59,7 +51,7 @@ public class POP3Client implements Runnable {
 			public void run() throws IOException {
 				tcpSend(reader.readLine());
 				
-				String data = new String(tcpReceive());
+				String data = tcpReceive();
 				
 				Main.onmessage(data);
 			}

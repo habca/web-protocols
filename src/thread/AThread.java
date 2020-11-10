@@ -1,4 +1,4 @@
-package smtp;
+package thread;
 
 import java.io.*;
 import java.net.*;
@@ -10,7 +10,7 @@ import java.net.*;
  * @author Ville Paju
  * @version 9.11.2020
  */
-public abstract class AbstractSMTP implements Runnable {
+public abstract class AThread implements Runnable {
 
 	private IThread runner;
 	

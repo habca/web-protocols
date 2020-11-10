@@ -1,4 +1,4 @@
-package smtp;
+package thread;
 
 import java.io.*;
 
