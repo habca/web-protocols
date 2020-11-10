@@ -6,6 +6,13 @@ import java.net.*;
 import main.*;
 import thread.*;
 
+/**
+ * Simple POP3 Client for TIES323
+ * 
+ * @author Harri Linna
+ * @author Ville Paju
+ * @version 10.11.2020
+ */
 public class POP3Client extends AThread {
 
 	private Socket socket;
@@ -47,7 +54,13 @@ public class POP3Client extends AThread {
 
 			@Override
 			public void run() throws IOException {
-				tcpSend(reader.readLine());
+				String resp = reader.readLine();
+				tcpSend(resp);
+				
+				if (resp.startsWith("LIST")) {
+					setState(receiveList(client));
+					return; // change state now
+				}
 				
 				String data = tcpReceive();
 				
@@ -56,5 +69,24 @@ public class POP3Client extends AThread {
 			
 		};
 		
+	}
+	
+	public IThread receiveList(POP3Client client) {
+		return new IThread() {
+
+			@Override
+			public void run() throws IOException {
+				
+				String data = tcpReceive();
+				
+				if (data.equals(".")) {
+					setState(sendCommand(client));
+					return; // do not print (.)
+				}
+				
+				Main.onmessage(data);
+			}
+			
+		};
 	}
 }

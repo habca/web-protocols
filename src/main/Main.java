@@ -13,6 +13,7 @@ import smtp.*;
  * @author Ville Paju
  * @version 2.11.2020
  * @version 5.11.2020
+ * @version 10.11.2020, server provides services
  */
 public class Main {
 

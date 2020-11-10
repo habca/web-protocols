@@ -1,13 +1,20 @@
 package pop3;
 
-public interface IPOP3State {
+/**
+ * States for the POP3Server
+ * 
+ * @author Harri Linna
+ * @author Ville Paju
+ * @version 10.11.2020
+ */
+public interface IPOP3ServerState {
 	
 	public String response(String str);
 	
 	public static final String ERROR = "-ERR command not understood";
 	
-	public static IPOP3State stateLogin(POP3Server server) {
-		return new IPOP3State() {
+	public static IPOP3ServerState stateLogin(POP3Server server) {
+		return new IPOP3ServerState() {
 
 			@Override
 			public String response(String str) {
@@ -21,8 +28,8 @@ public interface IPOP3State {
 		};
 	}
 	
-	public static IPOP3State stateAuthorize(POP3Server server) {
-		return new IPOP3State() {
+	public static IPOP3ServerState stateAuthorize(POP3Server server) {
+		return new IPOP3ServerState() {
 
 			@Override
 			public String response(String str) {
@@ -36,8 +43,8 @@ public interface IPOP3State {
 		};
 	}
 	
-	public static IPOP3State stateGeneral(POP3Server server) {
-		return new IPOP3State() {
+	public static IPOP3ServerState stateGeneral(POP3Server server) {
+		return new IPOP3ServerState() {
 
 			@Override
 			public String response(String str) {
@@ -46,7 +53,12 @@ public interface IPOP3State {
 					return "+OK farewell";
 				}
 				if (str.matches("^LIST")) {
-					return "+OK TODO: tulosta inboxin sisältö";
+					String format = "+OK %d messages (%d bytes)";
+					int total = server.getInbox().size();
+					int bytes = server.getInbox().getBytes();
+					
+					server.setState(stateGeneral(server));
+					return String.format(format, total, bytes);
 				}
 				return ERROR;
 			}

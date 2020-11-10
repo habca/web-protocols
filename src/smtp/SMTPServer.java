@@ -13,24 +13,26 @@ import thread.*;
  * @author Harri Linna
  * @author Ville Paju
  * @version 2.11.2020
- * @version 5.11.2020, interface for runnable thread
- * @version 9.11.2020, uses abstract class
+ * @version 5.11.2020, uses IThread
+ * @version 9.11.2020, uses AThread
  */
 public class SMTPServer extends AThread {
 	
+	private Inbox inbox;
 	private DatagramSocket socket;
 	private int size;
 	
 	private HashMap<String, String> map;
-	private ISMTPState state;
+	private ISMTPServerState state;
 	
-	public SMTPServer(DatagramSocket socket, int size) {
+	public SMTPServer(DatagramSocket socket, int size, Inbox inbox) {
+		this.inbox = inbox;
 		this.socket = socket;
 		this.size = size;
 		
 		initHashMap();
 		setState(receiveCommand(this));
-		setState(ISMTPState.stateInitial(this));
+		setState(ISMTPServerState.stateInitial(this));
 	}
 	
 	public DatagramPacket udpReceive() throws IOException {
@@ -56,7 +58,7 @@ public class SMTPServer extends AThread {
 		}
 	}
 	
-	public final void setState(ISMTPState state) {
+	public final void setState(ISMTPServerState state) {
 		this.state = state;
 	}
 	

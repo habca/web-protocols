@@ -8,12 +8,12 @@ package smtp;
  * @version 4.11.2020
  * @version 5.11.2020
  */
-public interface ISMTPState {
+public interface ISMTPServerState {
 	
 	public String response(String str);	 
 	
-	public static ISMTPState stateInitial(SMTPServer server) {
-		return new ISMTPState() {
+	public static ISMTPServerState stateInitial(SMTPServer server) {
+		return new ISMTPServerState() {
 
 			@Override
 			public String response(String str) {
@@ -27,8 +27,8 @@ public interface ISMTPState {
 		};
 	}
 	
-	public static ISMTPState stateGeneral(SMTPServer server) {
-		return new ISMTPState() {
+	public static ISMTPServerState stateGeneral(SMTPServer server) {
+		return new ISMTPServerState() {
 
 			@Override
 			public String response(String str) {				
@@ -49,8 +49,8 @@ public interface ISMTPState {
 		};
 	}
 	
-	public static ISMTPState stateData(SMTPServer server) {
-		return new ISMTPState() {
+	public static ISMTPServerState stateData(SMTPServer server) {
+		return new ISMTPServerState() {
 
 			@Override
 			public String response(String str) {

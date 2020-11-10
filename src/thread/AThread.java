@@ -1,11 +1,12 @@
 package thread;
 
 /**
- * Similar attributes and methods for SMTP
+ * Changes behaviour of a thread dynamically
  * 
  * @author Harri Linna
  * @author Ville Paju
  * @version 9.11.2020
+ * @version 10.11.2020, removed udp socket
  */
 public abstract class AThread implements Runnable {
 
