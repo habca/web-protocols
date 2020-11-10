@@ -1,8 +1,5 @@
 package thread;
 
-import java.io.*;
-import java.net.*;
-
 /**
  * Similar attributes and methods for SMTP
  * 

@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.*;
 
 import pop3.*;
-import smtp.SMTPClient;
+import smtp.*;
 
 /**
  * Simple Mail Transfer Protocol

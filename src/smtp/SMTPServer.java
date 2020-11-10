@@ -4,9 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import main.Main;
-import thread.AThread;
-import thread.IThread;
+import main.*;
+import thread.*;
 
 /**
  * Simple SMTP Server for TIES323

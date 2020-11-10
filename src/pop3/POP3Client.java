@@ -4,9 +4,7 @@ import java.io.*;
 import java.net.*;
 
 import main.*;
-import smtp.*;
-import thread.AThread;
-import thread.IThread;
+import thread.*;
 
 public class POP3Client extends AThread {
 

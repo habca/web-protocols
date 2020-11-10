@@ -4,8 +4,7 @@ import java.io.*;
 import java.net.*;
 
 import main.*;
-import thread.AThread;
-import thread.IThread;
+import thread.*;
 
 public class POP3Server extends AThread {
 	
