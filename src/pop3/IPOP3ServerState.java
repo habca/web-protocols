@@ -33,8 +33,8 @@ public interface IPOP3ServerState {
 
 			@Override
 			public String response(String str) {
-				server.setState(stateGeneral(server));
 				if (str.startsWith("PASS")) {
+					server.setState(stateGeneral(server));
 					return "+OK welcome";
 				}
 				return ERROR;

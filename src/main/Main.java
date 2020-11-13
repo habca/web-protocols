@@ -16,10 +16,26 @@ import smtp.*;
  * @version 10.11.2020, server provides services
  */
 public class Main {
+	
+	public InetAddress addr;
+	public int sport, cport, tport, size;
 
+	public Main() throws IOException {
+		addr = InetAddress.getByName("localhost");
+		sport = 8080; cport = 8081; tport = 8082; size = 256;
+
+	}
+	
 	public static void main(String[] args) throws IOException {
+		/*
 		InetAddress addr = InetAddress.getByName("localhost");
 		int sport = 8080, cport = 8081, tport = 8082, size = 256;
+		*/
+		
+		Main main = new Main();
+		InetAddress addr = main.addr;
+		int sport = main.sport, cport = main.cport, tport = main.tport, size = main.size;
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		
 		/*
 		DatagramSocket ssocket = new DatagramSocket(sport, addr);
@@ -37,9 +53,14 @@ public class Main {
 		new Thread(client).start();
 		*/
 		
+		/*
 		Socket csocket = new Socket(addr, tport);
 		Runnable client = new POP3Client(csocket);
 		new Thread(client).start();
+		*/
+		
+		Client client = new Client(main, reader);
+		client.clientPOP3();
 	}
 
 	public static void onmessage(String str) {
@@ -50,4 +71,5 @@ public class Main {
 		System.err.println(e.getMessage());
 		System.exit(1);
 	}
+	
 }

@@ -26,7 +26,7 @@ public class POP3Server extends AThread {
 		this.inbox = inbox;
 		this.port = port;
 		
-		setState(receiveCommand(this));
+		setState(sendCommand(this));
 		setState(IPOP3ServerState.stateLogin(this));
 	}
 	
@@ -46,7 +46,7 @@ public class POP3Server extends AThread {
 	public void run() {
 		try (ServerSocket ssocket = new ServerSocket(port)) {
 			socket = ssocket.accept();
-			while (true) {
+			while (getContinue()) {
 				getState().run();
 			}
 		} catch (IOException e) {
@@ -62,7 +62,7 @@ public class POP3Server extends AThread {
 		this.state = state;
 	}
 	
-	public IThread receiveCommand(POP3Server server) {
+	public IThread sendCommand(POP3Server server) {
 		return new IThread() {
 
 			@Override
@@ -86,7 +86,7 @@ public class POP3Server extends AThread {
 			@Override
 			public void run() throws IOException {
 				
-				setState(receiveCommand(server));
+				setState(sendCommand(server));
 				
 				int counter = 0;
 				Iterator<Email> it = server.inbox.iterator();

@@ -50,7 +50,7 @@ public class SMTPServer extends AThread {
 	@Override
 	public void run() {
 		try {
-			while (true) {
+			while (getContinue()) {
 				getState().run();
 			}
 		} catch (IOException e) {

@@ -10,6 +10,7 @@ package thread;
  */
 public abstract class AThread implements Runnable {
 
+	private boolean close;
 	private IThread runner;
 	
 	@Override
@@ -23,4 +24,11 @@ public abstract class AThread implements Runnable {
 		return runner;
 	}
 	
+	public final void setClose() {
+		close = true;
+	}
+	
+	public final boolean getContinue() {
+		return !close;
+	}
 }

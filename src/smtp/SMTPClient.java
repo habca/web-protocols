@@ -2,6 +2,7 @@ package smtp;
 
 import java.io.*;
 import java.net.*;
+import java.util.Objects;
 
 import main.*;
 import thread.*;
@@ -17,19 +18,24 @@ import thread.*;
  */
 public class SMTPClient extends AThread {
 	
+	public static String PROTOCOL = "smtp";
+	
 	private DatagramSocket socket;
 	private int size;
 	
 	private InetAddress addr;
 	private int port;
-	private BufferedReader reader;
+	//private BufferedReader reader;
+	private Client reader;
 	
-	public SMTPClient(DatagramSocket socket, int size, int port, InetAddress addr) {
+	public SMTPClient(DatagramSocket socket, int size, int port, InetAddress addr, Client reader) {
 		this.socket = socket;
 		this.size = size;
 		
 		this.addr = addr;
 		this.port = port;
+		
+		this.reader = reader;
 		
 		setState(sendCommand(this));
 	}
@@ -48,9 +54,19 @@ public class SMTPClient extends AThread {
 	
 	@Override
 	public void run() {
+		/*
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in))) {
 			reader = in;
-			while (true) {
+			while (getContinue()) {
+				getState().run();
+			}
+		} catch (IOException e) {
+			Main.onerror(e);
+		}
+		*/
+		
+		try {
+			while (getContinue()) {
 				getState().run();
 			}
 		} catch (IOException e) {
@@ -64,16 +80,19 @@ public class SMTPClient extends AThread {
 			@Override
 			public void run() throws IOException {
 				String resp = reader.readLine();
-				udpSend(resp, addr, port);
 				
-				DatagramPacket packet = udpReceive();
-				String data = new String(packet.getData(), 0, packet.getLength());
-				
-				if (data.startsWith("354")) {
-					setState(sendData(client));
+				if (Objects.nonNull(resp)) {
+					udpSend(resp, addr, port);
+					
+					DatagramPacket packet = udpReceive();
+					String data = new String(packet.getData(), 0, packet.getLength());
+					
+					if (data.startsWith("354")) {
+						setState(sendData(client));
+					}
+					
+					Main.onmessage(data);
 				}
-				
-				Main.onmessage(data);
 			}
 		};
 	}
@@ -84,15 +103,19 @@ public class SMTPClient extends AThread {
 			@Override
 			public void run() throws IOException {
 				String resp = reader.readLine();
-				udpSend(resp, addr, port);
 				
-				if (resp.equals(".")) {
-					setState(sendCommand(client));
+				if (Objects.nonNull(resp)) {
 					
-					DatagramPacket packet = udpReceive();
-					String data = new String(packet.getData(), 0, packet.getLength());
+					udpSend(resp, addr, port);
 					
-					Main.onmessage(data);
+					if (resp.equals(".")) {
+						setState(sendCommand(client));
+						
+						DatagramPacket packet = udpReceive();
+						String data = new String(packet.getData(), 0, packet.getLength());
+						
+						Main.onmessage(data);
+					}
 				}
 			}
 		};

@@ -2,6 +2,7 @@ package pop3;
 
 import java.io.*;
 import java.net.*;
+import java.util.Objects;
 
 import main.*;
 import thread.*;
@@ -15,21 +16,34 @@ import thread.*;
  */
 public class POP3Client extends AThread {
 
+	public static String PROTOCOL = "pop3";
+	
 	private Socket socket;
 	
-	private BufferedReader reader;
+	private Client reader;
 	
-	public POP3Client(Socket socket) {
+	public POP3Client(Socket socket, Client reader) {
 		this.socket = socket;
+		this.reader = reader;
 		
 		setState(sendCommand(this));
 	}
 	
 	@Override
 	public void run() {
+		/*
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in)) ) {
 			reader = in;
-			while (true) {
+			while (getContinue()) {
+				getState().run();
+			}
+		} catch (IOException e) {
+			Main.onerror(e);
+		}
+		*/
+		
+		try {
+			while (getContinue()) {
 				getState().run();
 			}
 		} catch (IOException e) {
@@ -55,16 +69,20 @@ public class POP3Client extends AThread {
 			@Override
 			public void run() throws IOException {
 				String resp = reader.readLine();
-				tcpSend(resp);
 				
-				if (resp.startsWith("LIST")) {
-					setState(receiveList(client));
-					return; // change state now
+				if (Objects.nonNull(resp)) {
+					
+					tcpSend(resp);
+					
+					if (resp.startsWith("LIST")) {
+						setState(receiveList(client));
+						return; // change state now
+					}
+					
+					String data = tcpReceive();
+					
+					Main.onmessage(data);
 				}
-				
-				String data = tcpReceive();
-				
-				Main.onmessage(data);
 			}
 			
 		};
@@ -79,12 +97,15 @@ public class POP3Client extends AThread {
 				
 				String data = tcpReceive();
 				
-				if (data.equals(".")) {
-					setState(sendCommand(client));
-					return; // do not print (.)
-				}
+				if (Objects.nonNull(data)) {
 				
-				Main.onmessage(data);
+					if (data.equals(".")) {
+						setState(sendCommand(client));
+						return; // do not print (.)
+					}
+					
+					Main.onmessage(data);
+				}
 			}
 			
 		};
