@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import mail.Inbox;
 import main.*;
 import thread.*;
 

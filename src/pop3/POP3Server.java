@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import mail.Email;
+import mail.Inbox;
 import main.*;
 import thread.*;
 
@@ -44,6 +46,8 @@ public class POP3Server extends AThread {
 	
 	@Override
 	public void run() {
+		// TODO: siirrä socketin avaaminen muualle
+		// TODO: siirrä run-metodi AThread-luokkaan
 		try (ServerSocket ssocket = new ServerSocket(port)) {
 			socket = ssocket.accept();
 			while (getContinue()) {

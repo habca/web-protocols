@@ -15,56 +15,31 @@ import thread.*;
  * @version 2.11.2020
  * @version 5.11.2020, interface for runnable threads
  * @version 9.11.2020, uses abstract class
+ * @version 14.11.2020, removed extra states
  */
-public class SMTPClient extends AThread {
+public class SMTPClient extends AThread implements Client.IClient {
 	
 	public static String PROTOCOL = "smtp";
 	
 	private DatagramSocket socket;
+	
 	private int size;
-	
-	private InetAddress addr;
 	private int port;
-	//private BufferedReader reader;
-	private Client reader;
+	private InetAddress addr;
 	
-	public SMTPClient(DatagramSocket socket, int size, int port, InetAddress addr, Client reader) {
+	public SMTPClient(DatagramSocket socket, int size, int port, InetAddress addr) {
 		this.socket = socket;
+		
 		this.size = size;
-		
-		this.addr = addr;
 		this.port = port;
+		this.addr = addr;
 		
-		this.reader = reader;
-		
-		setState(sendCommand(this));
-	}
-	
-	public DatagramPacket udpReceive() throws IOException {
-		DatagramPacket packet = new DatagramPacket(new byte[size], size);
-		socket.receive(packet);
-		return packet;
-	}
-	
-	public void udpSend(String str, InetAddress addr, int port) throws IOException {
-		byte[] data = str.getBytes();
-		DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
-		socket.send(packet);
+		//setState(sendCommand(this));
+		setState(onreceive());
 	}
 	
 	@Override
 	public void run() {
-		/*
-		try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in))) {
-			reader = in;
-			while (getContinue()) {
-				getState().run();
-			}
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
-		*/
-		
 		try {
 			while (getContinue()) {
 				getState().run();
@@ -74,6 +49,49 @@ public class SMTPClient extends AThread {
 		}
 	}
 	
+	@Override
+	public void send(String str) {
+		try {
+			udpSend(str, addr, port);
+		} catch (IOException e) {
+			Main.onerror(e);
+		}	
+	}
+	
+	private void udpSend(String str, InetAddress addr, int port) throws IOException {
+		byte[] data = str.getBytes();
+		DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
+		socket.send(packet);
+	}
+	
+	private String udpReceive() throws IOException {
+		DatagramPacket packet = new DatagramPacket(new byte[size], size);
+		socket.receive(packet);
+		return new String(packet.getData(), 0, packet.getLength());
+	}
+	
+	/*
+	public DatagramPacket udpReceive() throws IOException {
+		DatagramPacket packet = new DatagramPacket(new byte[size], size);
+		socket.receive(packet);
+		return packet;
+	}
+	*/
+	
+	private IThread onreceive() {
+		return new IThread() {
+
+			@Override
+			public void run() throws IOException {
+				String str = udpReceive();
+				Main.onmessage(str);
+			}
+			
+		};
+		
+	}
+	
+	/*
 	public IThread sendCommand(SMTPClient client) {
 		return new IThread() {
 				
@@ -121,5 +139,6 @@ public class SMTPClient extends AThread {
 		};
 		
 	}
+	*/
 	
 }

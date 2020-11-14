@@ -2,86 +2,78 @@ package main;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.Objects;
 
 import pop3.*;
 import smtp.*;
-import thread.*;
 
 /**
- * TODO: MAIN:   Pääohjelma vain parsii komentorivi-parametrit ja käynnistelee ohjelman tarvitsemat säikeet.
- * TODO: USER:   Tee Reader-luokka joka lukee käyttäjältä (user) syötettä (käyttöliittymä) omassa säikeessään.
- * TODO: CLIENT: Lähetä käyttäjän (user) syötteet asiakkaille (client), jotka kuuntelevat säikeessä vastausta palvelimelta (server),
- *               jolloin ei tarvitse jäädä odottamaan vastausta palvelimelta. (Tarvitseeko asiakas tilaa?)
- *               + Ei tarvitse koska palvelimen vastauksia ei jäädä odottamaan!
- *               + Toisaalta asiakkaat eroavat vain sillä mihin porttiin viestejä lähetetään.
- *               + Asiakkaat toki vastaanottavat (ja käsittelevät) viestejä
- * TODO: SERVER: Palvelimia ei tarvitse muuttaa, vastailevat vain saapuviin viesteihin ja käsittelevät inboxia
- *
- * TODO: Pitäisi perustua ajatukseen ettei vastaanotettuja viestejä jäädä odottamaan (user <-> client <-> server)
- * TODO: Muutosten jälkeen käyttäjä (user) voi vaihdella asiakkaiden (clients) välillä, koska asiakkaat eivät odota käyttäjältä syötettä.
- * 
  * @author Harri Linna
  * @version 14.11.2020
  */
 public class Client {
 	
-	private Main main;
-	private BufferedReader reader;
-	private AThread current;
-	private DatagramSocket csocket; // to recycle
-	private Socket tsocket;
+	private IClient clientSMTP; // TODO: poista attribuutti
+	private IClient clientPOP3; // TODO: poista attribuutti
 	
-	// TODO: poista main
-	public Client(Main main, BufferedReader reader) {
-		this.main = main;
-		this.reader = reader;
+	private IClient state; // current client
+	
+	public interface IClient {
+		public void send(String input);
+	}
+	
+	public void serviceSMTP(int cport, InetAddress addr, int size, int sport) throws SocketException {
+		DatagramSocket csocket = new DatagramSocket(cport, addr);
+		SMTPClient client = new SMTPClient(csocket, size, sport, addr);
+		new Thread(client).start();
+		clientSMTP = client;
+	}
 		
-		try {
-			this.csocket = new DatagramSocket(main.cport, main.addr);
-			tsocket = new Socket(main.addr, main.tport);
-		} catch (SocketException e) {
-			Main.onerror(e);
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
-	}
-	
-	public void closeCurrent() {
-		if (Objects.nonNull(current)) {
-			current.setClose();
-		}
-	}
-	
-	public void clientSMTP() throws SocketException {
-		closeCurrent();
-		//DatagramSocket csocket = new DatagramSocket(main.cport, main.addr);
-		AThread client = new SMTPClient(csocket, main.size, main.sport, main.addr, this);
+	public void servicePOP3(InetAddress addr, int tport) throws IOException {
+		Socket csocket = new Socket(addr, tport);
+		POP3Client client = new POP3Client(csocket);
 		new Thread(client).start();
-		current = client;
+		clientPOP3 = client;
 	}
 	
-	
-	public void clientPOP3() throws IOException {
-		closeCurrent();
-		//Socket csocket = new Socket(main.addr, main.tport);
-		AThread client = new POP3Client(tsocket, this);
-		new Thread(client).start();
-		current = client;
+	public void send(String input) {	
+		if (input.matches(SMTPClient.PROTOCOL)) {
+			Main.onmessage(String.format("%s client ready", input));
+			state = setClientSMTP();
+			return; // do not send
+		}
+		if (input.matches(POP3Client.PROTOCOL)) {
+			state = setClientPOP3();
+			Main.onmessage(String.format("%s client ready", input));
+			return; // do not send
+		}
+		if (Objects.isNull(state)) {
+			Main.onmessage("client was not found");
+			return; // do nothing
+		}
+		state.send(input); // send to client
 	}
+	
+	private IClient setClientSMTP() {
+		return new IClient() {
 
-	public String readLine() throws IOException {
-		String str = reader.readLine();
-		
-		if (str.matches(SMTPClient.PROTOCOL)) {
-			clientSMTP();
-			return null;
-		}
-		if (str.matches(POP3Client.PROTOCOL)) {
-			clientPOP3();
-			return null;
-		}
-		
-		return str;
+			@Override
+			public void send(String str) {
+				clientSMTP.send(str);
+			}
+			
+		};
 	}
+	
+	private IClient setClientPOP3() {
+		return new IClient() {
+
+			@Override
+			public void send(String str) {
+				clientPOP3.send(str);
+			}
+			
+		};
+	}
+	
 }
