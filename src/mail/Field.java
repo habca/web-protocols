@@ -15,4 +15,12 @@ public class Field {
 		return String.format("%s: %s", key, value);
 	}
 	
+	public String getKey() {
+		return key;
+	}
+	
+	public void append(String value) {
+		this.value += "CR" + value; // TODO: korjaa
+	}
+	
 }

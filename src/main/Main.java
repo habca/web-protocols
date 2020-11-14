@@ -19,7 +19,7 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		// TODO: http://commons.apache.org/proper/commons-cli/
 		InetAddress addr = InetAddress.getByName("localhost");
-		int sport = 8080, cport = 8081, tport = 8082, size = 256;
+		int sport = 8080, cport = 8081, tport = 8082, ttport = 8083, size = 256;
 		
 		/*
 		DatagramSocket ssocket = new DatagramSocket(sport, addr);
@@ -38,10 +38,12 @@ public class Main {
 		Server server = new Server();
 		server.serviceSMTP(addr, sport, size);
 		server.servicePOP3(tport);
+		server.serviceIMAP(ttport);
 		
 		Client client = new Client();
 		client.serviceSMTP(cport, addr, size, sport);
 		client.servicePOP3(addr, tport);
+		client.serviceIMAP(addr, ttport);
 		
 		User user = new User(System.in, client);
 		new Thread(user).start();

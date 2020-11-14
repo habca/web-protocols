@@ -53,12 +53,8 @@ public interface IPOP3ServerState {
 					return "+OK farewell";
 				}
 				if (str.matches("^LIST")) {
-					String format = "+OK %d messages (%d bytes)";
-					int total = server.getInbox().size();
-					int bytes = server.getInbox().getBytes();
-					
-					server.setState(stateGeneral(server));
-					return String.format(format, total, bytes);
+					//server.setState(stateGeneral(server));
+					return server.printLIST();
 				}
 				return ERROR;
 			}

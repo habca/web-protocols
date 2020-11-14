@@ -1,35 +1,27 @@
-package pop3;
+package imap;
 
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import mail.Email;
-import mail.Inbox;
+import mail.*;
 import main.*;
 import thread.*;
 
-/**
- * Simple POP3 Server for TIES323
- * 
- * @author Harri Linna
- * @author Ville Paju
- * @version 10.11.2020
- */
-public class POP3Server extends AThread {
+public class IMAPServer extends AThread {
 	
 	private Inbox inbox;
 	private Socket socket;
 	private int port;
 	
-	private IPOP3ServerState state;
+	private IMAPServerState state;
 
-	public POP3Server(int port, Inbox inbox) {
+	public IMAPServer(int port, Inbox inbox) {
 		this.inbox = inbox;
 		this.port = port;
 		
 		setState(sendCommand(this));
-		setState(IPOP3ServerState.stateLogin(this));
+		setState(IMAPServerState.stateLogin(this));
 	}
 	
 	public final String tcpReceive() throws IOException {
@@ -60,19 +52,12 @@ public class POP3Server extends AThread {
 			Main.onerror(e);
 		}
 	}
-	
-	public String printLIST() {
-		String format = "+OK %d messages (%d bytes)";
-		int total = inbox.size();
-		int bytes = inbox.getBytes();
-		return String.format(format, total, bytes);
-	}
 
-	public void setState(IPOP3ServerState state) {
+	public void setState(IMAPServerState state) {
 		this.state = state;
 	}
 	
-	public IThread sendCommand(POP3Server server) {
+	public IThread sendCommand(IMAPServer server) {
 		return new IThread() {
 
 			@Override
@@ -96,7 +81,7 @@ public class POP3Server extends AThread {
 	}
 	
 	/*
-	public IThread sendCommand(POP3Server server) {
+	public IThread sendCommand(IMAPServer server) {
 		return new IThread() {
 
 			@Override
@@ -113,7 +98,7 @@ public class POP3Server extends AThread {
 		};
 	}
 	
-	public IThread sendList(POP3Server server) {
+	public IThread sendList(IMAPServer server) {
 		return new IThread() {
 
 			@Override
@@ -134,4 +119,5 @@ public class POP3Server extends AThread {
 		};
 	}
 	*/
+	
 }

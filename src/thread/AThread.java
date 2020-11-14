@@ -1,5 +1,9 @@
 package thread;
 
+import java.io.*;
+
+import main.Main;
+
 /**
  * Changes behaviour of a thread dynamically
  * 
@@ -14,7 +18,15 @@ public abstract class AThread implements Runnable {
 	private IThread runner;
 	
 	@Override
-	public abstract void run();
+	public void run() {
+		try {
+			while (getContinue()) {
+				getState().run();
+			}
+		} catch (IOException e) {
+			Main.onerror(e);
+		}
+	}
 
 	public final void setState(IThread state) {
 		runner = state;

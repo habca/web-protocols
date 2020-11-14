@@ -5,7 +5,6 @@ import java.net.*;
 import java.util.*;
 
 import mail.Inbox;
-import main.*;
 import thread.*;
 
 /**
@@ -46,17 +45,6 @@ public class SMTPServer extends AThread {
 		byte[] data = str.getBytes();
 		DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
 		socket.send(packet);
-	}
-	
-	@Override
-	public void run() {
-		try {
-			while (getContinue()) {
-				getState().run();
-			}
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
 	}
 	
 	public final void setState(ISMTPServerState state) {

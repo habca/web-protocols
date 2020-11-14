@@ -28,17 +28,6 @@ public class POP3Client extends AThread implements Client.IClient {
 	}
 	
 	@Override
-	public void run() {
-		try {
-			while (getContinue()) {
-				getState().run();
-			}
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
-	}
-	
-	@Override
 	public void send(String str) {
 		try {
 			tcpSend(str);

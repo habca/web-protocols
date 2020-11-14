@@ -3,6 +3,7 @@ package main;
 import java.io.*;
 import java.net.*;
 
+import imap.*;
 import mail.*;
 import pop3.*;
 import smtp.*;
@@ -30,6 +31,11 @@ public class Server {
 		
 	public void servicePOP3(int tport) throws IOException {
 		Runnable server = new POP3Server(tport, inbox);
+		new Thread(server).start();
+	}
+	
+	public void serviceIMAP(int tport) throws IOException {
+		Runnable server = new IMAPServer(tport, inbox);
 		new Thread(server).start();
 	}
 }

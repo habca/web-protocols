@@ -23,18 +23,7 @@ public class User extends AThread {
 		
 		// TODO: tulosta käyttöohje
 		Main.onmessage("close with 'exit' or 'quit'");
-		Main.onmessage("select 'smtp' or 'pop3'");
-	}
-
-	@Override
-	public void run() {
-		try {
-			while (getContinue()) {
-				getState().run();
-			}
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
+		Main.onmessage("select 'smtp' or 'pop3' or 'imap'");
 	}
 	
 	private IThread onreceive() {

@@ -26,7 +26,19 @@ public class Email {
 	}
 	
 	public void setField(String key, String value) {
-		fields.add(new Field(key, value));
+		Iterator<Field> iterator = fields.iterator();
+		boolean flag = true;
+		while (iterator.hasNext()) {
+			Field field = iterator.next();
+			if (field.getKey().equals(key)) {
+				field.append(value);
+				flag = false;
+			}
+		}
+		
+		if (flag) {
+			fields.add(new Field(key, value));
+		}
 	}
 	
 	@Override

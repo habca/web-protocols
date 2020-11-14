@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Objects;
 
+import imap.IMAPClient;
 import pop3.*;
 import smtp.*;
 
@@ -15,6 +16,7 @@ public class Client {
 	
 	private IClient clientSMTP; // TODO: poista attribuutti
 	private IClient clientPOP3; // TODO: poista attribuutti
+	private IClient clientIMAP; // TODO: poista attribuutti
 	
 	private IClient state; // current client
 	
@@ -36,6 +38,13 @@ public class Client {
 		clientPOP3 = client;
 	}
 	
+	public void serviceIMAP(InetAddress addr, int tport) throws IOException {
+		Socket csocket = new Socket(addr, tport);
+		IMAPClient client = new IMAPClient(csocket);
+		new Thread(client).start();
+		clientIMAP = client;
+	}
+	
 	public void send(String input) {	
 		if (input.matches(SMTPClient.PROTOCOL)) {
 			Main.onmessage(String.format("%s client ready", input));
@@ -44,6 +53,11 @@ public class Client {
 		}
 		if (input.matches(POP3Client.PROTOCOL)) {
 			state = setClientPOP3();
+			Main.onmessage(String.format("%s client ready", input));
+			return; // do not send
+		}
+		if (input.matches(IMAPClient.PROTOCOL)) {
+			state = setClientIMAP();
 			Main.onmessage(String.format("%s client ready", input));
 			return; // do not send
 		}
@@ -71,6 +85,17 @@ public class Client {
 			@Override
 			public void send(String str) {
 				clientPOP3.send(str);
+			}
+			
+		};
+	}
+	
+	private IClient setClientIMAP() {
+		return new IClient() {
+
+			@Override
+			public void send(String str) {
+				clientIMAP.send(str);
 			}
 			
 		};
