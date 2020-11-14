@@ -1,5 +1,6 @@
 package mail;
 
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -17,13 +18,26 @@ public class Email {
 	
 	private int bytes;
 	
+	private List<Field> fields;
+	
 	public Email() {
 		bytes = ThreadLocalRandom.current().nextInt(MIN,MAX+1);
+		fields = new ArrayList<Field>();
+	}
+	
+	public void setField(String key, String value) {
+		fields.add(new Field(key, value));
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("%d", bytes);
+		//return String.format("%d", bytes);
+		StringBuilder sb = new StringBuilder();
+		Iterator<Field> iterator = fields.iterator();
+		while (iterator.hasNext()) {
+			sb.append(iterator.next().toString());
+		}
+		return sb.toString();
 	}
 	
 	public int getBytes() {

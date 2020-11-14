@@ -2,7 +2,6 @@ package smtp;
 
 import java.io.*;
 import java.net.*;
-import java.util.Objects;
 
 import main.*;
 import thread.*;

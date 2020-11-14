@@ -128,11 +128,28 @@ public class SMTPServer extends AThread {
 					setState(receiveCommand(server));
 					String resp = state.response(data);
 					udpSend(resp, packet.getAddress(), packet.getPort());
+					inbox.send();
+					return; // do not process
 				}
+				
+				processData(data);
 			}
 			
 		};
 		
+	}
+	
+	public void processData(String data) {
+		inbox.setField("DATA", data);
+	}
+	
+	public void processCommand(String command, String key) {
+		String cmd = splitCommand(command, key);
+		inbox.setField(key, cmd);
+	}
+	
+	public static String splitCommand(String command, String key) {
+		return command.split(key)[1].trim(); // TODO: indeksivirhe
 	}
 	
 }

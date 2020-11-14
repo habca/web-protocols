@@ -31,8 +31,13 @@ public interface ISMTPServerState {
 		return new ISMTPServerState() {
 
 			@Override
-			public String response(String str) {				
-				if (str.matches("^HELO|MAIL|RCPT")) {
+			public String response(String str) {		
+				if (str.matches("^MAIL")) {
+					server.processCommand(str, "^MAIL");
+					return server.getStatus("250");
+				}
+				if (str.matches("^RCPT")) {
+					server.processCommand(str, "^RCPT");
 					return server.getStatus("250");
 				}
 				if (str.matches("^DATA")) {
@@ -42,6 +47,12 @@ public interface ISMTPServerState {
 				if (str.matches("^QUIT")) {
 					server.setState(stateInitial(server));
 					return server.getStatus("221");
+				}
+				if (str.matches("RSET")) {
+					return server.getStatus("250");
+				}
+				if (str.matches("^HELO|NOOP")) {
+					return server.getStatus("250");
 				}
 				return server.getStatus("421");
 			}

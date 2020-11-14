@@ -13,10 +13,19 @@ public class Inbox extends ArrayList<Email> {
 	
 	private static final long serialVersionUID = 1L;
 
+	private Email draft;
+	
 	public Inbox() {
-		add(new Email());
-		add(new Email());
-		add(new Email());
+		draft = new Email();
+	}
+	
+	public void setField(String key, String value) {
+		draft.setField(key, value);
+	}
+	
+	public void send() {
+		add(draft);
+		draft = new Email();
 	}
 	
 	@Override
