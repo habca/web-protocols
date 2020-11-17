@@ -14,9 +14,7 @@ import thread.*;
  * @version 10.11.2020
  * @version 14.11.2020, removed extra states
  */
-public class POP3Client extends AThreadTCP implements Client.IClient {
-
-	public static String PROTOCOL = "pop3";
+public class POP3Client extends AThreadTCP implements IClient {
 	
 	public POP3Client(Socket socket) {
 		super(socket);
@@ -25,15 +23,7 @@ public class POP3Client extends AThreadTCP implements Client.IClient {
 	}
 	
 	@Override
-	public void send(String str) {
-		try {
-			tcpSend(str);
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
-	}
-	
-	private IThread onreceive() {
+	public IThread onreceive() {
 		return new IThread() {
 
 			@Override
@@ -44,10 +34,30 @@ public class POP3Client extends AThreadTCP implements Client.IClient {
 		
 		};
 	}
+	
+	@Override
+	public void send(String str) {
+		try {
+			tcpSend(str);
+		} catch (IOException e) {
+			Main.onerror(e);
+		}
+	}
 
 	@Override
 	public void help() {
-		// TODO Auto-generated method stub
+		Main.onmessage(
+				"The following are the POP3 commands:\n\n" +
+				"USER <SP> <username> <CRLF>\n" +
+				"PASS <SP> <password> <CRLF>\n" +
+				"LIST [<SP> <pathname>] <CRLF>\n" +
+				"QUIT <CRLF>"
+		);	
+	}
+	
+	@Override
+	public String protocol() {
+		return "pop3";
 	}
 
 	/*

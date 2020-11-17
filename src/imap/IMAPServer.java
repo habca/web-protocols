@@ -14,14 +14,14 @@ public class IMAPServer extends AThread {
 	private Socket socket;
 	private int port;
 	
-	private IMAPServerState state;
+	private IIMAPServerState state;
 
 	public IMAPServer(int port, Inbox inbox) {
 		this.inbox = inbox;
 		this.port = port;
 		
 		setState(sendCommand(this));
-		setState(IMAPServerState.stateLogin(this));
+		setState(IIMAPServerState.stateLogin(this));
 	}
 	
 	public final String tcpReceive() throws IOException {
@@ -53,7 +53,7 @@ public class IMAPServer extends AThread {
 		}
 	}
 
-	public void setState(IMAPServerState state) {
+	public void setState(IIMAPServerState state) {
 		this.state = state;
 	}
 	

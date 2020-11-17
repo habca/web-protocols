@@ -16,10 +16,8 @@ import thread.*;
  * @version 9.11.2020, uses abstract class
  * @version 14.11.2020, removed extra states
  */
-public class SMTPClient extends AThreadTCP implements Client.IClient {
-	
-	public static String PROTOCOL = "smtp";
-	
+public class SMTPClient extends AThreadTCP implements IClient {
+		
 	//private DatagramSocket socket;
 	
 	//private int size;
@@ -46,13 +44,17 @@ public class SMTPClient extends AThreadTCP implements Client.IClient {
 	}
 	
 	@Override
-	public void send(String str) {
-		try {
-			//udpSend(str, addr, port);
-			tcpSend(str);
-		} catch (IOException e) {
-			Main.onerror(e);
-		}	
+	public IThread onreceive() {
+		return new IThread() {
+
+			@Override
+			public void run() throws IOException {
+				//String str = udpReceive();
+				String str = tcpReceive();
+				Main.onmessage(str);
+			}
+			
+		};
 	}
 	
 	/*
@@ -67,9 +69,7 @@ public class SMTPClient extends AThreadTCP implements Client.IClient {
 		socket.receive(packet);
 		return new String(packet.getData(), 0, packet.getLength());
 	}
-	*/
 	
-	/*
 	public DatagramPacket udpReceive() throws IOException {
 		DatagramPacket packet = new DatagramPacket(new byte[size], size);
 		socket.receive(packet);
@@ -77,23 +77,31 @@ public class SMTPClient extends AThreadTCP implements Client.IClient {
 	}
 	*/
 	
-	private IThread onreceive() {
-		return new IThread() {
-
-			@Override
-			public void run() throws IOException {
-				//String str = udpReceive();
-				String str = tcpReceive();
-				Main.onmessage(str);
-			}
-			
-		};
-		
+	@Override
+	public void send(String str) {
+		try {
+			//udpSend(str, addr, port);
+			tcpSend(str);
+		} catch (IOException e) {
+			Main.onerror(e);
+		}	
 	}
 
 	@Override
 	public void help() {
-		// TODO Auto-generated method stub
+		Main.onmessage(
+				"The following are the SMTP commands:\n\n" +
+				"HELO <SP> <domain> <CRLF>\n" +
+	            "MAIL <SP> FROM:<reverse-path> <CRLF>\n" +
+	            "RCPT <SP> TO:<forward-path> <CRLF>\n" +
+	            "DATA <CRLF>\n" +
+	            "QUIT <CRLF>"
+		);
+	}
+	
+	@Override
+	public String protocol() {
+		return "smtp";
 	}
 	
 	/*

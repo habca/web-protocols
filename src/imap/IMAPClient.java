@@ -6,10 +6,8 @@ import java.net.*;
 import main.*;
 import thread.*;
 
-public class IMAPClient extends AThreadTCP implements Client.IClient {
+public class IMAPClient extends AThreadTCP implements IClient {
 
-	public static String PROTOCOL = "imap";
-	
 	public IMAPClient(Socket socket) {
 		super(socket);
 		
@@ -17,15 +15,7 @@ public class IMAPClient extends AThreadTCP implements Client.IClient {
 	}
 	
 	@Override
-	public void send(String str) {
-		try {
-			tcpSend(str);
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
-	}
-	
-	private IThread onreceive() {
+	public IThread onreceive() {
 		return new IThread() {
 
 			@Override
@@ -36,10 +26,29 @@ public class IMAPClient extends AThreadTCP implements Client.IClient {
 		
 		};
 	}
+	
+	@Override
+	public void send(String str) {
+		try {
+			tcpSend(str);
+		} catch (IOException e) {
+			Main.onerror(e);
+		}
+	}
 
 	@Override
 	public void help() {
-		// TODO Auto-generated method stub
+		Main.onmessage(
+				"The following are the IMAP commands:\n\n" +
+				"LOGIN <SP> <username> <SP> <password> <CRLF>\n" +
+				"LIST [<SP> <pathname>] <CRLF>\n" +
+				"LOGOUT <CRLF>"
+		);
+	}
+	
+	@Override
+	public String protocol() {
+		return "imap";
 	}
 
 }

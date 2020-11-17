@@ -19,7 +19,8 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		// TODO: http://commons.apache.org/proper/commons-cli/
 		InetAddress addr = InetAddress.getByName("localhost");
-		int sport = 8080, cport = 8081, tport = 8082, ttport = 8083, size = 256;
+		//int sport = 8080, cport = 8081, tport = 8082, ttport = 8083, size = 256;
+		int sport = 8080, tport = 8082, ttport = 8083;
 		
 		InetAddress funet_addr = InetAddress.getByName("ftp.funet.fi");
 		int ftp_port = 21;

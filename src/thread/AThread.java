@@ -43,4 +43,5 @@ public abstract class AThread implements Runnable {
 	public final boolean getContinue() {
 		return !close;
 	}
+	
 }

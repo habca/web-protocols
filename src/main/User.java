@@ -16,16 +16,11 @@ public class User extends AThread {
 	private Client client;
 	
 	public User(InputStream input, Client client) {
-		
-		
 		this.reader = new BufferedReader(new InputStreamReader(input));
 		this.client = client;
 		
 		setState(onreceive());
-		
-		// TODO: tulosta käyttöohje
-		Main.onmessage("close with 'exit' or 'quit'");
-		Main.onmessage("select 'smtp' or 'pop3' or 'imap'");
+		client.help();
 	}
 	
 	private IThread onreceive() {
@@ -34,11 +29,9 @@ public class User extends AThread {
 			@Override
 			public void run() throws IOException {
 				String input = reader.readLine();
-				
-				if (input.matches("exit|quit")) {
+				if (input.matches("quit")) {
 					System.exit(0);
 				}
-				
 				client.send(input);
 			}
 			

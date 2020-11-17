@@ -1,11 +1,6 @@
 package thread;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.*;
 
 import main.Main;
@@ -25,6 +20,8 @@ public abstract class AThreadTCP extends AThread {
 		this.socket = socket;
 	}
 
+	public abstract IThread onreceive();
+	
 	public final void tcpSend(String str) throws IOException {
 		OutputStream out = socket.getOutputStream();
 		PrintWriter printer = new PrintWriter(out, true);

@@ -1,13 +1,13 @@
 package imap;
 
-public interface IMAPServerState {
+public interface IIMAPServerState {
 	
 public String response(String str);
 	
 	public static final String ERROR = "BAD - command unknown or arguments invalid";
 	
-	public static IMAPServerState stateLogin(IMAPServer server) {
-		return new IMAPServerState() {
+	public static IIMAPServerState stateLogin(IMAPServer server) {
+		return new IIMAPServerState() {
 
 			@Override
 			public String response(String str) {
@@ -21,8 +21,8 @@ public String response(String str);
 		};
 	}
 	
-	public static IMAPServerState stateGeneral(IMAPServer server) {
-		return new IMAPServerState() {
+	public static IIMAPServerState stateGeneral(IMAPServer server) {
+		return new IIMAPServerState() {
 
 			@Override
 			public String response(String str) {
