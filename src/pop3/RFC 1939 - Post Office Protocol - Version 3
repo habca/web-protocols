@@ -1,0 +1,144 @@
+                    Post Office Protocol - Version 3
+                    
+4. The AUTHORIZATION State
+
+      QUIT
+
+         Arguments: none
+
+         Restrictions: none
+
+         Possible Responses:
+             +OK
+
+         Examples:
+             C: QUIT
+             S: +OK dewey POP3 server signing off
+             
+             
+5. The TRANSACTION State
+
+      LIST [msg]
+
+         Arguments:
+             a message-number (optional), which, if present, may NOT
+             refer to a message marked as deleted
+
+         Restrictions:
+             may only be given in the TRANSACTION state
+
+         Possible Responses:
+             +OK scan listing follows
+             -ERR no such message
+
+         Examples:
+             C: LIST
+             S: +OK 2 messages (320 octets)
+             S: 1 120
+             S: 2 200
+             S: .
+               ...
+             C: LIST 2
+             S: +OK 2 200
+               ...
+             C: LIST 3
+             S: -ERR no such message, only 2 messages in maildrop
+             
+6. The UPDATE State
+
+
+      QUIT
+
+         Arguments: none
+
+         Restrictions: none
+
+         Discussion:
+             The POP3 server removes all messages marked as deleted
+             from the maildrop and replies as to the status of this
+             operation.  If there is an error, such as a resource
+             shortage, encountered while removing messages, the
+             maildrop may result in having some or none of the messages
+             marked as deleted be removed.  In no case may the server
+             remove any messages not marked as deleted.
+
+             Whether the removal was successful or not, the server
+             then releases any exclusive-access lock on the maildrop
+             and closes the TCP connection.
+
+         Possible Responses:
+             +OK
+             -ERR some deleted messages not removed
+
+         Examples:
+             C: QUIT
+             S: +OK dewey POP3 server signing off (maildrop empty)
+                ...
+             C: QUIT
+             S: +OK dewey POP3 server signing off (2 messages left)
+                ...
+                
+
+      USER name
+
+         Arguments:
+             a string identifying a mailbox (required), which is of
+             significance ONLY to the server
+
+         Restrictions:
+             may only be given in the AUTHORIZATION state after the POP3
+             greeting or after an unsuccessful USER or PASS command
+
+         Possible Responses:
+             +OK name is a valid mailbox
+             -ERR never heard of mailbox name
+
+         Examples:
+             C: USER frated
+             S: -ERR sorry, no mailbox for frated here
+                ...
+             C: USER mrose
+             S: +OK mrose is a real hoopy frood
+
+
+      PASS string
+
+         Arguments:
+             a server/mailbox-specific password (required)
+
+         Restrictions:
+             may only be given in the AUTHORIZATION state immediately
+             after a successful USER command
+
+         Possible Responses:
+             +OK maildrop locked and ready
+             -ERR invalid password
+             -ERR unable to lock maildrop
+
+         Examples:
+             C: USER mrose
+             S: +OK mrose is a real hoopy frood
+             C: PASS secret
+             S: -ERR maildrop already locked
+               ...
+             C: USER mrose
+             S: +OK mrose is a real hoopy frood
+             C: PASS secret
+             S: +OK mrose's maildrop has 2 messages (320 octets)
+
+             
+9. POP3 Command Summary
+
+      Minimal POP3 Commands:
+
+         USER name               valid in the AUTHORIZATION state
+         PASS string
+         QUIT
+
+         LIST [msg]              valid in the TRANSACTION state
+         QUIT
+
+      POP3 Replies:
+
+         +OK
+         -ERR

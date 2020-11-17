@@ -1,0 +1,164 @@
+                     SIMPLE MAIL TRANSFER PROTOCOL
+                     
+   4.2.  SMTP REPLIES
+                     
+The following are the SMTP commands:
+
+            HELO <SP> <domain> <CRLF>
+            MAIL <SP> FROM:<reverse-path> <CRLF>
+            RCPT <SP> TO:<forward-path> <CRLF>
+            DATA <CRLF>
+            RSET <CRLF>
+            SEND <SP> FROM:<reverse-path> <CRLF>
+            HELP [<SP> <string>] <CRLF>
+            NOOP <CRLF>
+            QUIT <CRLF>
+            
+4.2.2.  NUMERIC ORDER LIST OF REPLY CODES
+
+         211 System status, or system help reply
+         214 Help message
+            [Information on how to use the receiver or the meaning of a
+            particular non-standard command; this reply is useful only
+            to the human user]
+         220 <domain> Service ready
+         221 <domain> Service closing transmission channel
+         250 Requested mail action okay, completed
+         251 User not local; will forward to <forward-path>
+
+         354 Start mail input; end with <CRLF>.<CRLF>
+
+         421 <domain> Service not available,
+             closing transmission channel
+            [This may be a reply to any command if the service knows it
+            must shut down]
+         450 Requested mail action not taken: mailbox unavailable
+            [E.g., mailbox busy]
+         451 Requested action aborted: local error in processing
+         452 Requested action not taken: insufficient system storage
+
+         500 Syntax error, command unrecognized
+            [This may include errors such as command line too long]
+         501 Syntax error in parameters or arguments
+         502 Command not implemented
+         503 Bad sequence of commands
+         504 Command parameter not implemented
+         550 Requested action not taken: mailbox unavailable
+            [E.g., mailbox not found, no access]
+         551 User not local; please try <forward-path>
+         552 Requested mail action aborted: exceeded storage allocation
+         553 Requested action not taken: mailbox name not allowed
+            [E.g., mailbox syntax incorrect]
+         554 Transaction failed
+         
+   4.3.  SEQUENCING OF COMMANDS AND REPLIES
+   
+CONNECTION ESTABLISHMENT
+               S: 220
+               F: 421
+            HELO
+               S: 250
+               E: 500, 501, 504, 421
+            MAIL
+               S: 250
+               F: 552, 451, 452
+               E: 500, 501, 421
+            RCPT
+               S: 250, 251
+               F: 550, 551, 552, 553, 450, 451, 452
+               E: 500, 501, 503, 421
+            DATA
+               I: 354 -> data -> S: 250
+                                 F: 552, 554, 451, 452
+               F: 451, 554
+               E: 500, 501, 503, 421
+            RSET
+               S: 250
+               E: 500, 501, 504, 421
+            SEND
+               S: 250
+               F: 552, 451, 452
+               E: 500, 501, 502, 421
+            SOML
+               S: 250
+               F: 552, 451, 452
+               E: 500, 501, 502, 421
+            SAML
+               S: 250
+               F: 552, 451, 452
+               E: 500, 501, 502, 421
+            VRFY
+               S: 250, 251
+               F: 550, 551, 553
+               E: 500, 501, 502, 504, 421
+            EXPN
+               S: 250
+               F: 550
+               E: 500, 501, 502, 504, 421
+            HELP
+               S: 211, 214
+               E: 500, 501, 502, 504, 421
+            NOOP
+               S: 250
+               E: 500, 421
+            QUIT
+               S: 221
+               E: 500
+            TURN
+               S: 250
+               F: 502
+               E: 500, 503
+               
+   4.4.  STATE DIAGRAMS
+   
+      For each command there are three possible outcomes:  "success"
+      (S), "failure" (F), and "error" (E). In the state diagrams below
+      we use the symbol B for "begin", and the symbol W for "wait for
+      reply".
+
+      First, the diagram that represents most of the SMTP commands:
+
+
+                                  1,3    +---+
+                             ----------->| E |
+                            |            +---+
+                            |
+         +---+    cmd    +---+    2      +---+
+         | B |---------->| W |---------->| S |
+         +---+           +---+           +---+
+                            |
+                            |     4,5    +---+
+                             ----------->| F |
+                                         +---+
+
+
+         This diagram models the commands:
+
+            HELO, MAIL, RCPT, RSET, SEND, SOML, SAML, VRFY, EXPN, HELP,
+            NOOP, QUIT, TURN.
+
+      A more complex diagram models the DATA command:
+
+
+         +---+   DATA    +---+ 1,2                 +---+
+         | B |---------->| W |-------------------->| E |
+         +---+           +---+        ------------>+---+
+                         3| |4,5     |
+                          | |        |
+            --------------   -----   |
+           |                      |  |             +---+
+           |               ----------     -------->| S |
+           |              |       |      |         +---+
+           |              |  ------------
+           |              | |     |
+           V           1,3| |2    |
+         +---+   data    +---+     --------------->+---+
+         |   |---------->| W |                     | F |
+         +---+           +---+-------------------->+---+
+                              4,5
+
+
+         Note that the "data" here is a series of lines sent from the
+         sender to the receiver with no response expected until the last
+         line is sent.
+   
