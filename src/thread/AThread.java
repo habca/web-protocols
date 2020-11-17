@@ -2,7 +2,7 @@ package thread;
 
 import java.io.*;
 
-import main.Main;
+import main.*;
 
 /**
  * Changes behaviour of a thread dynamically
@@ -27,7 +27,7 @@ public abstract class AThread implements Runnable {
 			Main.onerror(e);
 		}
 	}
-
+	
 	public final void setState(IThread state) {
 		runner = state;
 	}

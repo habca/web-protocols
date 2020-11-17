@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Objects;
 
+import ftp.FTPClient;
 import imap.IMAPClient;
 import pop3.*;
 import smtp.*;
@@ -17,16 +18,21 @@ public class Client {
 	private IClient clientSMTP; // TODO: poista attribuutti
 	private IClient clientPOP3; // TODO: poista attribuutti
 	private IClient clientIMAP; // TODO: poista attribuutti
+	private IClient clientFTP; // TODO: poista attribuutti
 	
 	private IClient state; // current client
 	
 	public interface IClient {
 		public void send(String input);
+		public void help();
 	}
 	
-	public void serviceSMTP(int cport, InetAddress addr, int size, int sport) throws SocketException {
-		DatagramSocket csocket = new DatagramSocket(cport, addr);
-		SMTPClient client = new SMTPClient(csocket, size, sport, addr);
+	//public void serviceSMTP(int cport, InetAddress addr, int size, int sport) throws SocketException {
+	public void serviceSMTP(InetAddress addr, int tport) throws IOException {
+		//DatagramSocket csocket = new DatagramSocket(cport, addr);
+		//SMTPClient client = new SMTPClient(csocket, size, sport, addr);
+		Socket socket = new Socket(addr, tport);
+		SMTPClient client = new SMTPClient(socket);
 		new Thread(client).start();
 		clientSMTP = client;
 	}
@@ -45,60 +51,43 @@ public class Client {
 		clientIMAP = client;
 	}
 	
+	public void serviceFTP(InetAddress addr, int port) throws IOException {
+		Socket socket = new Socket(addr, port);
+		FTPClient client = new FTPClient(socket);
+		new Thread(client).start();
+		clientFTP = client;
+	}
+	
 	public void send(String input) {	
 		if (input.matches(SMTPClient.PROTOCOL)) {
 			Main.onmessage(String.format("%s client ready", input));
-			state = setClientSMTP();
+			state = clientSMTP;
 			return; // do not send
 		}
 		if (input.matches(POP3Client.PROTOCOL)) {
-			state = setClientPOP3();
+			state = clientPOP3;
 			Main.onmessage(String.format("%s client ready", input));
 			return; // do not send
 		}
 		if (input.matches(IMAPClient.PROTOCOL)) {
-			state = setClientIMAP();
+			state = clientIMAP;
 			Main.onmessage(String.format("%s client ready", input));
 			return; // do not send
+		}
+		if (input.startsWith(FTPClient.PROTOCOL)) {
+			state = clientFTP;
+			Main.onmessage(String.format("%s client ready", input));
+			return; // do not send
+		}
+		if (input.equals("help")) {
+			state.help();
+			return;
 		}
 		if (Objects.isNull(state)) {
 			Main.onmessage("client was not found");
 			return; // do nothing
 		}
 		state.send(input); // send to client
-	}
-	
-	private IClient setClientSMTP() {
-		return new IClient() {
-
-			@Override
-			public void send(String str) {
-				clientSMTP.send(str);
-			}
-			
-		};
-	}
-	
-	private IClient setClientPOP3() {
-		return new IClient() {
-
-			@Override
-			public void send(String str) {
-				clientPOP3.send(str);
-			}
-			
-		};
-	}
-	
-	private IClient setClientIMAP() {
-		return new IClient() {
-
-			@Override
-			public void send(String str) {
-				clientIMAP.send(str);
-			}
-			
-		};
 	}
 	
 }

@@ -14,16 +14,13 @@ import thread.*;
  * @version 10.11.2020
  * @version 14.11.2020, removed extra states
  */
-public class POP3Client extends AThread implements Client.IClient {
+public class POP3Client extends AThreadTCP implements Client.IClient {
 
 	public static String PROTOCOL = "pop3";
 	
-	private Socket socket;
-	
 	public POP3Client(Socket socket) {
-		this.socket = socket;
+		super(socket);
 		
-		//setState(sendCommand(this));
 		setState(onreceive());
 	}
 	
@@ -36,18 +33,6 @@ public class POP3Client extends AThread implements Client.IClient {
 		}
 	}
 	
-	private void tcpSend(String str) throws IOException {
-		OutputStream out = socket.getOutputStream();
-		PrintWriter printer = new PrintWriter(out, true);
-		printer.println(str);
-	}
-	
-	private String tcpReceive() throws IOException {
-		InputStream in = socket.getInputStream();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		return reader.readLine();
-	}
-	
 	private IThread onreceive() {
 		return new IThread() {
 
@@ -58,6 +43,11 @@ public class POP3Client extends AThread implements Client.IClient {
 			}
 		
 		};
+	}
+
+	@Override
+	public void help() {
+		// TODO Auto-generated method stub
 	}
 
 	/*

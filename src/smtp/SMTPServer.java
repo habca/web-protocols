@@ -4,7 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import mail.Inbox;
+import mail.*;
+import main.Main;
 import thread.*;
 
 /**
@@ -19,22 +20,58 @@ import thread.*;
 public class SMTPServer extends AThread {
 	
 	private Inbox inbox;
-	private DatagramSocket socket;
-	private int size;
+	private Socket socket;
+	private int port;
+	
+	//private DatagramSocket socket;
+	//private int size;
 	
 	private HashMap<String, String> map;
 	private ISMTPServerState state;
 	
-	public SMTPServer(DatagramSocket socket, int size, Inbox inbox) {
+	//public SMTPServer(DatagramSocket socket, int size, Inbox inbox) {
+	public SMTPServer(int port, Inbox inbox) {
 		this.inbox = inbox;
-		this.socket = socket;
-		this.size = size;
+		this.port = port;
+		
+		//this.socket = socket;
+		//this.size = size;
 		
 		initHashMap();
 		setState(receiveCommand(this));
 		setState(ISMTPServerState.stateInitial(this));
 	}
 	
+	public final String tcpReceive() throws IOException {
+		InputStream in = socket.getInputStream();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		return reader.readLine();
+	}
+	
+	public final void tcpSend(String str) throws IOException {
+		try {
+			Thread.sleep((long) 100); // delay ms
+			OutputStream out = socket.getOutputStream();
+			PrintWriter printer = new PrintWriter(out, true);
+			printer.println(str);
+		} catch (InterruptedException e) {
+			Main.onerror(e);
+		}
+	}
+	
+	@Override
+	public void run() {
+		try (ServerSocket ssocket = new ServerSocket(port)) {
+			socket = ssocket.accept();
+			while (getContinue()) {
+				getState().run();
+			}
+		} catch (IOException e) {
+			Main.onerror(e);
+		}
+	}
+	
+	/*
 	public DatagramPacket udpReceive() throws IOException {
 		DatagramPacket packet = new DatagramPacket(new byte[size], size);
 		socket.receive(packet);
@@ -46,6 +83,7 @@ public class SMTPServer extends AThread {
 		DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
 		socket.send(packet);
 	}
+	*/
 	
 	public final void setState(ISMTPServerState state) {
 		this.state = state;
@@ -87,9 +125,9 @@ public class SMTPServer extends AThread {
 
 			@Override
 			public void run() throws IOException {
-				DatagramPacket packet = udpReceive();
-				
-				String data = new String(packet.getData(), 0, packet.getLength());
+				//DatagramPacket packet = udpReceive();
+				//String data = new String(packet.getData(), 0, packet.getLength());
+				String data = tcpReceive();
 				
 				if (data.startsWith("DATA")) {
 					setState(receiveData(server));
@@ -97,7 +135,8 @@ public class SMTPServer extends AThread {
 				
 				String resp = state.response(data);
 				
-				udpSend(resp, packet.getAddress(), packet.getPort());
+				//udpSend(resp, packet.getAddress(), packet.getPort());
+				tcpSend(resp);
 			}
 			
 		};
@@ -108,14 +147,17 @@ public class SMTPServer extends AThread {
 
 			@Override
 			public void run() throws IOException {
-				DatagramPacket packet = udpReceive();
-				
-				String data = new String(packet.getData(), 0, packet.getLength());
+				//DatagramPacket packet = udpReceive();
+				//String data = new String(packet.getData(), 0, packet.getLength());
+				String data = tcpReceive();
 				
 				if (data.equals(".")) {
 					setState(receiveCommand(server));
 					String resp = state.response(data);
-					udpSend(resp, packet.getAddress(), packet.getPort());
+					
+					//udpSend(resp, packet.getAddress(), packet.getPort());
+					tcpSend(resp);
+					
 					inbox.send();
 					return; // do not process
 				}

@@ -23,9 +23,11 @@ public class Server {
 		inbox = new Inbox();
 	}
 	
-	public void serviceSMTP(InetAddress addr, int sport, int size) throws SocketException {
-		DatagramSocket ssocket = new DatagramSocket(sport, addr);
-		Runnable server = new SMTPServer(ssocket, size, inbox);
+	//public void serviceSMTP(InetAddress addr, int sport, int size) throws SocketException {
+	public void serviceSMTP(int sport) throws IOException {
+		//DatagramSocket ssocket = new DatagramSocket(sport, addr);
+		//Runnable server = new SMTPServer(ssocket, size, inbox);
+		Runnable server = new SMTPServer(sport, inbox);
 		new Thread(server).start();
 	}
 		

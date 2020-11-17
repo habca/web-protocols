@@ -16,6 +16,8 @@ public class User extends AThread {
 	private Client client;
 	
 	public User(InputStream input, Client client) {
+		
+		
 		this.reader = new BufferedReader(new InputStreamReader(input));
 		this.client = client;
 		

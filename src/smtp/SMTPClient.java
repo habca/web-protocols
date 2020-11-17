@@ -16,16 +16,17 @@ import thread.*;
  * @version 9.11.2020, uses abstract class
  * @version 14.11.2020, removed extra states
  */
-public class SMTPClient extends AThread implements Client.IClient {
+public class SMTPClient extends AThreadTCP implements Client.IClient {
 	
 	public static String PROTOCOL = "smtp";
 	
-	private DatagramSocket socket;
+	//private DatagramSocket socket;
 	
-	private int size;
-	private int port;
-	private InetAddress addr;
+	//private int size;
+	//private int port;
+	//private InetAddress addr;
 	
+	/*
 	public SMTPClient(DatagramSocket socket, int size, int port, InetAddress addr) {
 		this.socket = socket;
 		
@@ -36,16 +37,25 @@ public class SMTPClient extends AThread implements Client.IClient {
 		//setState(sendCommand(this));
 		setState(onreceive());
 	}
+	*/
+	
+	public SMTPClient(Socket socket) {
+		super(socket);
+		
+		setState(onreceive());
+	}
 	
 	@Override
 	public void send(String str) {
 		try {
-			udpSend(str, addr, port);
+			//udpSend(str, addr, port);
+			tcpSend(str);
 		} catch (IOException e) {
 			Main.onerror(e);
 		}	
 	}
 	
+	/*
 	private void udpSend(String str, InetAddress addr, int port) throws IOException {
 		byte[] data = str.getBytes();
 		DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
@@ -57,6 +67,7 @@ public class SMTPClient extends AThread implements Client.IClient {
 		socket.receive(packet);
 		return new String(packet.getData(), 0, packet.getLength());
 	}
+	*/
 	
 	/*
 	public DatagramPacket udpReceive() throws IOException {
@@ -71,12 +82,18 @@ public class SMTPClient extends AThread implements Client.IClient {
 
 			@Override
 			public void run() throws IOException {
-				String str = udpReceive();
+				//String str = udpReceive();
+				String str = tcpReceive();
 				Main.onmessage(str);
 			}
 			
 		};
 		
+	}
+
+	@Override
+	public void help() {
+		// TODO Auto-generated method stub
 	}
 	
 	/*

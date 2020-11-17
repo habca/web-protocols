@@ -6,14 +6,12 @@ import java.net.*;
 import main.*;
 import thread.*;
 
-public class IMAPClient extends AThread implements Client.IClient {
+public class IMAPClient extends AThreadTCP implements Client.IClient {
 
 	public static String PROTOCOL = "imap";
 	
-	private Socket socket;
-	
 	public IMAPClient(Socket socket) {
-		this.socket = socket;
+		super(socket);
 		
 		setState(onreceive());
 	}
@@ -27,18 +25,6 @@ public class IMAPClient extends AThread implements Client.IClient {
 		}
 	}
 	
-	private void tcpSend(String str) throws IOException {
-		OutputStream out = socket.getOutputStream();
-		PrintWriter printer = new PrintWriter(out, true);
-		printer.println(str);
-	}
-	
-	private String tcpReceive() throws IOException {
-		InputStream in = socket.getInputStream();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		return reader.readLine();
-	}
-	
 	private IThread onreceive() {
 		return new IThread() {
 
@@ -49,6 +35,11 @@ public class IMAPClient extends AThread implements Client.IClient {
 			}
 		
 		};
+	}
+
+	@Override
+	public void help() {
+		// TODO Auto-generated method stub
 	}
 
 }
