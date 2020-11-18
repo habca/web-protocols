@@ -6,7 +6,7 @@ public String response(String str);
 	
 	public static final String ERROR = "BAD - command unknown or arguments invalid";
 	
-	public static IIMAPServerState stateLogin(IMAPServer server) {
+	public static IIMAPServerState stateLogin(IMAPServerReceiver server) {
 		return new IIMAPServerState() {
 
 			@Override
@@ -21,7 +21,7 @@ public String response(String str);
 		};
 	}
 	
-	public static IIMAPServerState stateGeneral(IMAPServer server) {
+	public static IIMAPServerState stateGeneral(IMAPServerReceiver server) {
 		return new IIMAPServerState() {
 
 			@Override

@@ -9,12 +9,12 @@ import thread.*;
 // TODO: AThreadTCP versio lakkaa toimimasta yhden viestin jälkeen
 
 //public class FTPDataReceiver extends AThreadTCP {
-public class FTPDataReceiver extends AThread {
+public class FTPClientReceiver extends AThread {
 	
 	private InetAddress addr;
 	private int port;
 	
-	public static FTPDataReceiver create(InetAddress addr, int port) {
+	public static FTPClientReceiver create(InetAddress addr, int port) {
 		/*
 		try {
 			FTPDataReceiver thread = new FTPDataReceiver(addr, port);
@@ -26,13 +26,13 @@ public class FTPDataReceiver extends AThread {
 		}
 		*/
 		
-		FTPDataReceiver thread = new FTPDataReceiver(addr, port);
+		FTPClientReceiver thread = new FTPClientReceiver(addr, port);
 		new Thread(thread).start();
 		return thread;
 	}
 	
 	//private FTPDataReceiver(InetAddress addr, int port) throws IOException {
-	private FTPDataReceiver(InetAddress addr, int port) {
+	private FTPClientReceiver(InetAddress addr, int port) {
 		//super(addr, port);
 		this.addr = addr;
 		this.port = port;

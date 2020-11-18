@@ -54,7 +54,7 @@ public class FTPClient extends AThreadTCP implements IClient {
 	@Override
 	public void send(String str) {
 		if (str.matches("LIST|RETR")) {
-			FTPDataReceiver.create(addr, port);
+			FTPClientReceiver.create(addr, port);
 		}
 		tcpSend(str);
 	}

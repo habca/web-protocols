@@ -21,22 +21,7 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		int smtp_port = 8025, pop3_port = 8110, imap_port = 8143;
 		
-		/*
-		DatagramSocket ssocket = new DatagramSocket(sport, addr);
-		Runnable server = new SMTPServer(ssocket, size);
-		new Thread(server).start();
-		
-		DatagramSocket csocket = new DatagramSocket(cport, addr);
-		Runnable client = new SMTPClient(csocket, size, sport, addr);
-		new Thread(client).start();
-		
-		Socket csocket = new Socket(addr, tport);
-		Runnable client = new POP3Client(csocket);
-		new Thread(client).start();
-		*/
-		
 		Server server = new Server();
-		//server.serviceSMTP(addr, sport, size);
 		server.serviceSMTP(smtp_port);
 		server.servicePOP3(pop3_port);
 		server.serviceIMAP(imap_port);
