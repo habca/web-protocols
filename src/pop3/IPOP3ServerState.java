@@ -13,7 +13,7 @@ public interface IPOP3ServerState {
 	
 	public static final String ERROR = "-ERR command not understood";
 	
-	public static IPOP3ServerState stateLogin(POP3Server server) {
+	public static IPOP3ServerState stateLogin(POP3ServerReceiver server) {
 		return new IPOP3ServerState() {
 
 			@Override
@@ -28,7 +28,7 @@ public interface IPOP3ServerState {
 		};
 	}
 	
-	public static IPOP3ServerState stateAuthorize(POP3Server server) {
+	public static IPOP3ServerState stateAuthorize(POP3ServerReceiver server) {
 		return new IPOP3ServerState() {
 
 			@Override
@@ -43,7 +43,7 @@ public interface IPOP3ServerState {
 		};
 	}
 	
-	public static IPOP3ServerState stateGeneral(POP3Server server) {
+	public static IPOP3ServerState stateGeneral(POP3ServerReceiver server) {
 		return new IPOP3ServerState() {
 
 			@Override

@@ -27,7 +27,7 @@ public String response(String str);
 			@Override
 			public String response(String str) {
 				if (str.startsWith("LIST")) {
-					//server.setState(stateLogin(server));
+					server.setState(stateLogin(server));
 					return "OK - list completed";
 				}
 				if (str.startsWith("LOGOUT")) {

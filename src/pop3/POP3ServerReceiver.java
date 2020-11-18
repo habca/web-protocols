@@ -1,4 +1,4 @@
-package imap;
+package pop3;
 
 import java.io.*;
 import java.net.*;
@@ -8,14 +8,14 @@ import mail.*;
 import main.*;
 import thread.*;
 
-public class IMAPServerReceiver extends AThreadTCP {
+public class POP3ServerReceiver extends AThreadTCP {
 
 	private Inbox inbox;
-	private IIMAPServerState state;
+	private IPOP3ServerState state;
 	
-	public static IMAPServerReceiver create(Socket socket, Inbox inbox) {
+	public static POP3ServerReceiver create(Socket socket, Inbox inbox) {
 		try {
-			IMAPServerReceiver server = new IMAPServerReceiver(socket, inbox);
+			POP3ServerReceiver server = new POP3ServerReceiver(socket, inbox);
 			new Thread(server).start();
 			return server;
 		} catch (IOException e) {
@@ -24,17 +24,17 @@ public class IMAPServerReceiver extends AThreadTCP {
 		}
 	}
 	
-	private IMAPServerReceiver(Socket socket, Inbox inbox) throws IOException {
+	private POP3ServerReceiver(Socket socket, Inbox inbox) throws IOException {
 		super(socket);
 		
 		this.inbox = inbox;
-		setState(IIMAPServerState.stateLogin(this));
+		setState(IPOP3ServerState.stateLogin(this));
 	}
 	
-	public void setState(IIMAPServerState state) {
+	public void setState(IPOP3ServerState state) {
 		this.state = state;
 	}
-	
+
 	@Override
 	public IThread onreceive() {
 		return new IThread() {
@@ -57,6 +57,14 @@ public class IMAPServerReceiver extends AThreadTCP {
 			}
 			
 		};
+	}
+	
+	// TODO: private
+	public String printLIST() {
+		String format = "+OK %d messages (%d bytes)";
+		int total = inbox.size();
+		int bytes = inbox.getBytes();
+		return String.format(format, total, bytes);
 	}
 	
 }

@@ -17,6 +17,10 @@ public abstract class AThreadTCP extends AThread {
 	public AThreadTCP(InetAddress addr, int port) throws IOException {
 		this.socket = new Socket(addr, port);
 	}
+	
+	public AThreadTCP(Socket socket) throws IOException {
+		this.socket = socket;
+	}
 
 	@Override
 	public void run() {
