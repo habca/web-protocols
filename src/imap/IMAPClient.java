@@ -8,10 +8,21 @@ import thread.*;
 
 public class IMAPClient extends AThreadTCP implements IClient {
 
-	public IMAPClient(Socket socket) {
-		super(socket);
-		
-		setState(onreceive());
+	public static final String PROTOCOL = "imap";
+	
+	public static IMAPClient create(InetAddress addr, int port) {
+		try {
+			IMAPClient client = new IMAPClient(addr, port);
+			new Thread(client).start();
+			return client;
+		} catch (Exception e) {
+			Main.onerror(e);
+			return null;
+		}
+	}
+	
+	private IMAPClient(InetAddress addr, int port) throws IOException {
+		super(addr, port);
 	}
 	
 	@Override
@@ -29,11 +40,7 @@ public class IMAPClient extends AThreadTCP implements IClient {
 	
 	@Override
 	public void send(String str) {
-		try {
-			tcpSend(str);
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
+		tcpSend(str);
 	}
 
 	@Override
@@ -44,11 +51,6 @@ public class IMAPClient extends AThreadTCP implements IClient {
 				"LIST [<SP> <pathname>] <CRLF>\n" +
 				"LOGOUT <CRLF>"
 		);
-	}
-	
-	@Override
-	public String protocol() {
-		return "imap";
 	}
 
 }

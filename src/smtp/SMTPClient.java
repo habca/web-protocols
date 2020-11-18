@@ -17,7 +17,9 @@ import thread.*;
  * @version 14.11.2020, removed extra states
  */
 public class SMTPClient extends AThreadTCP implements IClient {
-		
+
+	public static final String PROTOCOL = "smtp";
+	
 	//private DatagramSocket socket;
 	
 	//private int size;
@@ -37,10 +39,19 @@ public class SMTPClient extends AThreadTCP implements IClient {
 	}
 	*/
 	
-	public SMTPClient(Socket socket) {
-		super(socket);
-		
-		setState(onreceive());
+	public static SMTPClient create(InetAddress addr, int port) {
+		try {
+			SMTPClient client = new SMTPClient(addr, port);
+			new Thread(client).start();
+			return client;
+		} catch (IOException e) {
+			Main.onerror(e);
+			return null;
+		}
+	}
+	
+	private SMTPClient(InetAddress addr, int port) throws IOException {
+		super(addr, port);
 	}
 	
 	@Override
@@ -79,12 +90,8 @@ public class SMTPClient extends AThreadTCP implements IClient {
 	
 	@Override
 	public void send(String str) {
-		try {
-			//udpSend(str, addr, port);
-			tcpSend(str);
-		} catch (IOException e) {
-			Main.onerror(e);
-		}	
+		//udpSend(str, addr, port);
+		tcpSend(str);
 	}
 
 	@Override
@@ -97,11 +104,6 @@ public class SMTPClient extends AThreadTCP implements IClient {
 	            "DATA <CRLF>\n" +
 	            "QUIT <CRLF>"
 		);
-	}
-	
-	@Override
-	public String protocol() {
-		return "smtp";
 	}
 	
 	/*

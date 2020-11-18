@@ -1,7 +1,9 @@
 package main;
 
 import java.io.*;
-import java.net.*;
+
+// TODO: http://commons.apache.org/proper/commons-cli/
+// TODO: parsi porttinumerot komentoriviltä
 
 /**
  * Simple Mail Transfer Protocol
@@ -17,13 +19,7 @@ import java.net.*;
 public class Main {
 	
 	public static void main(String[] args) throws IOException {
-		// TODO: http://commons.apache.org/proper/commons-cli/
-		InetAddress addr = InetAddress.getByName("localhost");
-		//int sport = 8080, cport = 8081, tport = 8082, ttport = 8083, size = 256;
-		int sport = 8080, tport = 8082, ttport = 8083;
-		
-		InetAddress funet_addr = InetAddress.getByName("ftp.funet.fi");
-		int ftp_port = 21;
+		int smtp_port = 8025, pop3_port = 8110, imap_port = 8143;
 		
 		/*
 		DatagramSocket ssocket = new DatagramSocket(sport, addr);
@@ -41,18 +37,11 @@ public class Main {
 		
 		Server server = new Server();
 		//server.serviceSMTP(addr, sport, size);
-		server.serviceSMTP(sport);
-		server.servicePOP3(tport);
-		server.serviceIMAP(ttport);
+		server.serviceSMTP(smtp_port);
+		server.servicePOP3(pop3_port);
+		server.serviceIMAP(imap_port);
 		
 		Client client = new Client();
-		//client.serviceSMTP(cport, addr, size, sport);
-		//client.serviceSMTP(addr, cport);
-		client.serviceSMTP(addr, sport);
-		client.servicePOP3(addr, tport);
-		client.serviceIMAP(addr, ttport);
-		client.serviceFTP(funet_addr, ftp_port);
-		
 		User user = new User(System.in, client);
 		new Thread(user).start();
 	}
@@ -67,8 +56,6 @@ public class Main {
 	
 	public static void onerror(Exception e) {
 		System.err.println(e.getMessage());
-		e.printStackTrace();
-		System.exit(1);
 	}
 	
 }

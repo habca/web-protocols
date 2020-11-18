@@ -20,7 +20,7 @@ public abstract class AThread implements Runnable {
 	@Override
 	public void run() {
 		try {
-			while (getContinue()) {
+			while (!isClosed()) {
 				getState().run();
 			}
 		} catch (IOException e) {
@@ -36,12 +36,12 @@ public abstract class AThread implements Runnable {
 		return runner;
 	}
 	
-	public final void setClose() {
+	public final void close() {
 		close = true;
 	}
 	
-	public final boolean getContinue() {
-		return !close;
+	public final boolean isClosed() {
+		return close;
 	}
 	
 }

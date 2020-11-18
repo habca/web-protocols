@@ -8,13 +8,24 @@ import thread.*;
 
 public class FTPClient extends AThreadTCP implements IClient {
 	
-	private InetAddress data_host;
-	private int data_port;
+	public static final String PROTOCOL = "ftp";
 	
-	public FTPClient(Socket socket) {
-		super(socket);
-		
-		setState(onreceive());
+	private InetAddress addr;
+	private int port;
+	
+	public static FTPClient create(InetAddress addr, int port) {
+		try {
+			FTPClient client = new FTPClient(addr, port);
+			new Thread(client).start();
+			return client;
+		} catch (IOException e) {
+			Main.onerror(e);
+			return null;
+		}
+	}
+	
+	private FTPClient(InetAddress addr, int port) throws IOException {
+		super(addr, port);
 	}
 	
 	@Override
@@ -28,13 +39,12 @@ public class FTPClient extends AThreadTCP implements IClient {
 				Main.onmessage(str);
 				
 				if (str.startsWith("221")) { // QUIT
-					closeSocket(); // close tcp
-					setClose(); // stop thread
+					close();
 				}
 				if (str.startsWith("227")) { // PASV
 					String str_addr = Static.extractAddress(str);
-					data_host = InetAddress.getByName(str_addr);
-					data_port = Static.extractPort(str);
+					addr = InetAddress.getByName(str_addr);
+					port = Static.extractPort(str);
 				}
 			}
 		
@@ -43,15 +53,10 @@ public class FTPClient extends AThreadTCP implements IClient {
 	
 	@Override
 	public void send(String str) {
-		try {
-			if (str.matches("LIST|RETR")) {
-				Runnable thread = new FTPDataReceiver(data_host, data_port);
-				new Thread(thread).start();
-			}
-			tcpSend(str);
-		} catch (IOException e) {
-			Main.onerror(e);
+		if (str.matches("LIST|RETR")) {
+			FTPDataReceiver.create(addr, port);
 		}
+		tcpSend(str);
 	}
 	
 	@Override
@@ -65,11 +70,6 @@ public class FTPClient extends AThreadTCP implements IClient {
 				"RETR <SP> <pathname> <CRLF>\n" +
 				"QUIT <CRLF>"
 		);
-	}
-	
-	@Override
-	public String protocol() {
-		return "ftp";
 	}
 	    
 }

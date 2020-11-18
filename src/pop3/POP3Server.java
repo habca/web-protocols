@@ -53,7 +53,7 @@ public class POP3Server extends AThread {
 	public void run() {
 		try (ServerSocket ssocket = new ServerSocket(port)) {
 			socket = ssocket.accept();
-			while (getContinue()) {
+			while (!isClosed()) {
 				getState().run();
 			}
 		} catch (IOException e) {
@@ -86,9 +86,9 @@ public class POP3Server extends AThread {
 					Iterator<Email> it = inbox.iterator();
 					while (it.hasNext()) {
 						String next = it.next().toString();
-						tcpSend(String.format("%d %s", ++counter, next)); // maybe dropped
+						tcpSend(String.format("%d %s", ++counter, next));
 					}
-					tcpSend("."); // maybe dropped
+					tcpSend(".");
 				}
 			}
 			

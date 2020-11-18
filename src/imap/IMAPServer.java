@@ -45,7 +45,7 @@ public class IMAPServer extends AThread {
 	public void run() {
 		try (ServerSocket ssocket = new ServerSocket(port)) {
 			socket = ssocket.accept();
-			while (getContinue()) {
+			while (!isClosed()) {
 				getState().run();
 			}
 		} catch (IOException e) {

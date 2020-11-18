@@ -3,38 +3,64 @@ package ftp;
 import java.io.*;
 import java.net.*;
 
-import main.Main;
+import main.*;
 import thread.*;
 
+// TODO: AThreadTCP versio lakkaa toimimasta yhden viestin jälkeen
+
+//public class FTPDataReceiver extends AThreadTCP {
 public class FTPDataReceiver extends AThread {
 	
-	public FTPDataReceiver(InetAddress addr, int port) {
+	private InetAddress addr;
+	private int port;
+	
+	public static FTPDataReceiver create(InetAddress addr, int port) {
+		/*
+		try {
+			FTPDataReceiver thread = new FTPDataReceiver(addr, port);
+			new Thread(thread).start();
+			return thread;
+		} catch (IOException e) {
+			Main.onerror(e);
+			return null;
+		}
+		*/
 		
-		setState(new IThread() {
+		FTPDataReceiver thread = new FTPDataReceiver(addr, port);
+		new Thread(thread).start();
+		return thread;
+	}
+	
+	//private FTPDataReceiver(InetAddress addr, int port) throws IOException {
+	private FTPDataReceiver(InetAddress addr, int port) {
+		//super(addr, port);
+		this.addr = addr;
+		this.port = port;
+		setState(onreceive());
+	}
+	
+	public IThread onreceive() {
+		return new IThread() {
 
 			@Override
 			public void run() throws IOException {
-				dataTcp(addr, port);
+				Socket socket = new Socket(addr, port);
+				InputStream in = new DataInputStream(
+						new BufferedInputStream(
+								socket.getInputStream()
+				));
+				
+				int count;
+				byte[] buffer = new byte[4096]; // TODO: ???
+				while ((count = in.read(buffer)) > 0)
+				{
+					Main.onmessage(buffer, 0, count);
+				}
+				
+				socket.close();
 			}
 			
-		});
+		};
 	}
-	
-	public void dataTcp(InetAddress addr, int port) throws IOException {
-		Socket data_socket = new Socket(addr, port);
-		InputStream in = new DataInputStream(
-				new BufferedInputStream(
-						data_socket.getInputStream()
-		));
 		
-		int count;
-		byte[] buffer = new byte[4096]; // TODO: ???
-		while ((count = in.read(buffer)) > 0)
-		{
-			Main.onmessage(buffer, 0, count);
-		}
-		
-		data_socket.close();
-	}
-	
 }
