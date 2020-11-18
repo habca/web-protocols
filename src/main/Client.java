@@ -26,7 +26,6 @@ public class Client implements IClient {
 		}
 		
 		if (parseClient(input)) {
-			help();
 			return;
 		}
 		
@@ -37,20 +36,20 @@ public class Client implements IClient {
 		
 		client.send(input); // send to client
 	}
-
+	
 	@Override
 	public void help() {
 		if (client != null) {
 			client.help();
 		} else {
 			Main.onmessage(
-					"The following are the terminal commands:\n\n" +
-					"smtp <SP> <host> <SP> <port> <CRLF>\n" +
-					"pop3 <SP> <host> <SP> <port> <CRLF>\n" +
-					"imap <SP> <host> <SP> <port> <CRLF>\n" +
-					"ftp <SP> <host> <SP> <port> <CRLF>\n" +
-					"help <CRLF>\n" +
-					"quit <CRLF>"
+					"The following are the terminal commands:\n" +
+					"smtp <host> <port>\n" +
+					"pop3 <host> <port>\n" +
+					"imap <host> <port>\n" +
+					"ftp <host> <port>\n" +
+					"help\n" +
+					"quit"
 			);
 		}
 	}

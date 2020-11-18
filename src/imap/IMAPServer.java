@@ -12,7 +12,18 @@ public class IMAPServer extends AThread {
 	private Inbox inbox;
 	private ServerSocket socket;
 
-	public IMAPServer(int port, Inbox inbox) throws IOException {
+	public static IMAPServer create(int port, Inbox inbox) {
+		try {
+			IMAPServer server = new IMAPServer(port, inbox);
+			new Thread(server).start();
+			return server;
+		} catch (IOException e) {
+			Main.onerror(e);
+			return null;
+		}
+	}
+	
+	private IMAPServer(int port, Inbox inbox) throws IOException {
 		this.inbox = inbox;
 		
 		socket = new ServerSocket(port);

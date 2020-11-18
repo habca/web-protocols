@@ -46,10 +46,10 @@ public class IMAPClient extends AThreadTCP implements IClient {
 	@Override
 	public void help() {
 		Main.onmessage(
-				"The following are the IMAP commands:\n\n" +
-				"LOGIN <SP> <username> <SP> <password> <CRLF>\n" +
-				"LIST [<SP> <pathname>] <CRLF>\n" +
-				"LOGOUT <CRLF>"
+				"The following are the IMAP commands:\n" +
+				"LOGIN <username> <password>\n" +
+				"LIST [<pathname>]\n" +
+				"LOGOUT"
 		);
 	}
 

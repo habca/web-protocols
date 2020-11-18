@@ -12,7 +12,7 @@ public interface ISMTPServerState {
 	
 	public String response(String str);	 
 	
-	public static ISMTPServerState stateInitial(SMTPServer server) {
+	public static ISMTPServerState stateInitial(SMTPServerReceiver server) {
 		return new ISMTPServerState() {
 
 			@Override
@@ -27,7 +27,7 @@ public interface ISMTPServerState {
 		};
 	}
 	
-	public static ISMTPServerState stateGeneral(SMTPServer server) {
+	public static ISMTPServerState stateGeneral(SMTPServerReceiver server) {
 		return new ISMTPServerState() {
 
 			@Override
@@ -60,7 +60,7 @@ public interface ISMTPServerState {
 		};
 	}
 	
-	public static ISMTPServerState stateData(SMTPServer server) {
+	public static ISMTPServerState stateData(SMTPServerReceiver server) {
 		return new ISMTPServerState() {
 
 			@Override

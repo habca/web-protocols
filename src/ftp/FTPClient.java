@@ -62,13 +62,13 @@ public class FTPClient extends AThreadTCP implements IClient {
 	@Override
 	public void help() {
 		Main.onmessage(
-				"The following are the FTP commands:\n\n" +
-				"USER <SP> <username> <CRLF>\n" +
-				"PASS <SP> <password> <CRLF>\n" +
-				"PASV <CRLF>\n" +
-				"LIST [<SP> <pathname>] <CRLF>\n" +
-				"RETR <SP> <pathname> <CRLF>\n" +
-				"QUIT <CRLF>"
+				"The following are the FTP commands:\n" +
+				"USER <username>\n" +
+				"PASS <password>\n" +
+				"PASV\n" +
+				"LIST [<pathname>]\n" +
+				"RETR <pathname> \n" +
+				"QUIT"
 		);
 	}
 	    

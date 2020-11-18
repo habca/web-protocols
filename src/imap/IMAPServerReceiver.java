@@ -29,6 +29,9 @@ public class IMAPServerReceiver extends AThreadTCP {
 		
 		this.inbox = inbox;
 		setState(IIMAPServerState.stateLogin(this));
+		
+		String format = "OK imap ready for requests from %s";
+		tcpSend(String.format(format, socket.getLocalSocketAddress()));
 	}
 	
 	public void setState(IIMAPServerState state) {
