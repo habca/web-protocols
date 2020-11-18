@@ -7,7 +7,6 @@ import java.net.*;
 import java.util.*;
 
 import mail.*;
-import main.*;
 import thread.*;
 
 public class SMTPServerReceiver extends AThreadTCP {
@@ -16,23 +15,14 @@ public class SMTPServerReceiver extends AThreadTCP {
 	private ISMTPServerState state;
 	private HashMap<String, String> map;
 	
-	public static SMTPServerReceiver create(Socket socket, Inbox inbox) {
-		try {
-			SMTPServerReceiver server = new SMTPServerReceiver(socket, inbox);
-			new Thread(server).start();
-			return null;
-		} catch (IOException e) {
-			Main.onerror(e);
-			return null;
-		}
-	}
-	
 	public SMTPServerReceiver(Socket socket, Inbox inbox) throws IOException {
 		super(socket);
 		
 		this.inbox = inbox;
 		setState(ISMTPServerState.stateInitial(this));
 		initHashMap();
+		
+		new Thread(this).start();
 		
 		String format = "220 %s Service ready";
 		tcpSend(String.format(format, socket.getLocalSocketAddress()));

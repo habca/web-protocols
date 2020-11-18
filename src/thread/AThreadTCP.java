@@ -6,9 +6,12 @@ import java.net.*;
 import main.*;
 
 /**
+ * Huom! Konstruktorin viimeinen rivi:
+ *       new Thread(this).start();
+ * 
  * @author Harri Linna
  * @author Ville Paju
- * @version 17.1.2020
+ * @version 18.11.2020
  */
 public abstract class AThreadTCP extends AThread {
 
@@ -52,6 +55,10 @@ public abstract class AThreadTCP extends AThread {
 		InputStream in = socket.getInputStream();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		return reader.readLine();
+	}
+	
+	public InputStream getInputStream() throws IOException {
+		return socket.getInputStream();
 	}
 	
 }

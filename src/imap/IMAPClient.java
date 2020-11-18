@@ -10,19 +10,10 @@ public class IMAPClient extends AThreadTCP implements IClient {
 
 	public static final String PROTOCOL = "imap";
 	
-	public static IMAPClient create(InetAddress addr, int port) {
-		try {
-			IMAPClient client = new IMAPClient(addr, port);
-			new Thread(client).start();
-			return client;
-		} catch (Exception e) {
-			Main.onerror(e);
-			return null;
-		}
-	}
-	
-	private IMAPClient(InetAddress addr, int port) throws IOException {
+	public IMAPClient(InetAddress addr, int port) throws IOException {
 		super(addr, port);
+		
+		new Thread(this).start();
 	}
 	
 	@Override

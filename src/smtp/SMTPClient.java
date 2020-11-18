@@ -20,19 +20,10 @@ public class SMTPClient extends AThreadTCP implements IClient {
 
 	public static final String PROTOCOL = "smtp";
 	
-	public static SMTPClient create(InetAddress addr, int port) {
-		try {
-			SMTPClient client = new SMTPClient(addr, port);
-			new Thread(client).start();
-			return client;
-		} catch (IOException e) {
-			Main.onerror(e);
-			return null;
-		}
-	}
-	
-	private SMTPClient(InetAddress addr, int port) throws IOException {
+	public SMTPClient(InetAddress addr, int port) throws IOException {
 		super(addr, port);
+		
+		new Thread(this).start();
 	}
 	
 	@Override

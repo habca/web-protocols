@@ -5,7 +5,6 @@ import java.net.*;
 import java.util.*;
 
 import mail.*;
-import main.*;
 import thread.*;
 
 public class POP3ServerReceiver extends AThreadTCP {
@@ -13,22 +12,15 @@ public class POP3ServerReceiver extends AThreadTCP {
 	private Inbox inbox;
 	private IPOP3ServerState state;
 	
-	public static POP3ServerReceiver create(Socket socket, Inbox inbox) {
-		try {
-			POP3ServerReceiver server = new POP3ServerReceiver(socket, inbox);
-			new Thread(server).start();
-			return server;
-		} catch (IOException e) {
-			Main.onerror(e);
-			return null;
-		}
-	}
-	
-	private POP3ServerReceiver(Socket socket, Inbox inbox) throws IOException {
+	public POP3ServerReceiver(Socket socket, Inbox inbox) throws IOException {
 		super(socket);
 		
 		this.inbox = inbox;
 		setState(IPOP3ServerState.stateLogin(this));
+		
+		new Thread(this).start();
+		
+		tcpSend("+OK this is pop3 greeting");
 	}
 	
 	public void setState(IPOP3ServerState state) {

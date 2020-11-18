@@ -21,22 +21,13 @@ public class SMTPServer extends AThread {
 	private Inbox inbox;
 	private ServerSocket socket;
 	
-	public static SMTPServer create(int port, Inbox inbox) {
-		try {
-			SMTPServer server = new SMTPServer(port, inbox);
-			new Thread(server).start();
-			return server;
-		} catch (IOException e) {
-			Main.onerror(e);
-			return null;
-		}
-	}
-	
-	private SMTPServer(int port, Inbox inbox) throws IOException {
+	public SMTPServer(int port, Inbox inbox) throws IOException {
 		this.inbox = inbox;
 		
 		socket = new ServerSocket(port);
 		setState(onreceive());
+		
+		new Thread(this).start();
 	}
 	
 	@Override
@@ -57,7 +48,7 @@ public class SMTPServer extends AThread {
 			@Override
 			public void run() throws IOException {
 				Socket client = socket.accept();
-				SMTPServerReceiver.create(client, inbox);
+				new SMTPServerReceiver(client, inbox);
 			}
 			
 		};

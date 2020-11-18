@@ -22,19 +22,15 @@ public class User extends AThread {
 	private BufferedReader reader;
 	private IClient client;
 	
-	public static User create(InputStream in) {
-		User user = new User(in);
-		new Thread(user).start();
-		return user;
-	}
-	
-	private User(InputStream in) {
+	public User(InputStream in) {
 		this.reader = new BufferedReader(new InputStreamReader(in));
 		
 		client = placeholder();
 		client.help();
 		
 		setState(onreceive());
+		
+		new Thread(this).start();
 	}
 	
 	private IThread onreceive() {
@@ -66,7 +62,7 @@ public class User extends AThread {
 		};
 	}
 	
-	private boolean parseClient(String str) {
+	private boolean parseClient(String str) throws IOException {
 		String protocol;
 		InetAddress addr;
 		int port;
@@ -82,25 +78,25 @@ public class User extends AThread {
 		
 		if (protocol.equals(SMTPClient.PROTOCOL)) {
 			client.close();
-			client = SMTPClient.create(addr, port);
+			client = new SMTPClient(addr, port);
 			return true;
 		}
 		
 		if (protocol.equals(POP3Client.PROTOCOL)) {
 			client.close();
-			client = POP3Client.create(addr, port);
+			client = new POP3Client(addr, port);
 			return true;
 		}
 		
 		if (protocol.equals(IMAPClient.PROTOCOL)) {
 			client.close();
-			client = IMAPClient.create(addr, port);
+			client = new IMAPClient(addr, port);
 			return true;
 		}
 		
 		if (protocol.equals(FTPClient.PROTOCOL)) {
 			client.close();
-			client = FTPClient.create(addr, port);
+			client = new FTPClient(addr, port);
 			return true;
 		}
 		

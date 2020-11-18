@@ -18,23 +18,14 @@ public class POP3Server extends AThread {
 	
 	private Inbox inbox;
 	private ServerSocket socket;
-
-	public static POP3Server create(int port, Inbox inbox) {
-		try {
-			POP3Server server = new POP3Server(port, inbox);
-			new Thread(server).start();
-			return server;
-		} catch (IOException e) {
-			Main.onerror(e);
-			return null;
-		}
-	}
 	
-	private POP3Server(int port, Inbox inbox) throws IOException {
+	public POP3Server(int port, Inbox inbox) throws IOException {
 		this.inbox = inbox;
 		
 		socket = new ServerSocket(port);
 		setState(onreceive());
+		
+		new Thread(this).start();
 	}
 	
 	@Override
@@ -55,7 +46,7 @@ public class POP3Server extends AThread {
 			@Override
 			public void run() throws IOException {
 				Socket client = socket.accept();
-				POP3ServerReceiver.create(client, inbox);
+				new POP3ServerReceiver(client, inbox);
 			}
 			
 		};

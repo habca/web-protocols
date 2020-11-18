@@ -13,19 +13,10 @@ public class FTPClient extends AThreadTCP implements IClient {
 	private InetAddress addr;
 	private int port;
 	
-	public static FTPClient create(InetAddress addr, int port) {
-		try {
-			FTPClient client = new FTPClient(addr, port);
-			new Thread(client).start();
-			return client;
-		} catch (IOException e) {
-			Main.onerror(e);
-			return null;
-		}
-	}
-	
-	private FTPClient(InetAddress addr, int port) throws IOException {
+	public FTPClient(InetAddress addr, int port) throws IOException {
 		super(addr, port);
+		
+		new Thread(this).start();
 	}
 	
 	@Override
@@ -52,9 +43,10 @@ public class FTPClient extends AThreadTCP implements IClient {
 	}
 	
 	@Override
-	public void send(String str) {
-		if (str.matches("LIST|RETR")) {
-			FTPClientReceiver.create(addr, port);
+	public void send(String str) throws IOException {
+		if (str.startsWith("LIST") || 
+				str.startsWith("RETR")) {
+			new FTPClientReceiver(addr, port);
 		}
 		tcpSend(str);
 	}
