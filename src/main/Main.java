@@ -1,14 +1,12 @@
 package main;
 
-import java.io.*;
-
-import imap.IMAPServer;
+import imap.*;
 import mail.*;
-import pop3.POP3Server;
-import smtp.SMTPServer;
+import pop3.*;
+import smtp.*;
 
 // TODO: http://commons.apache.org/proper/commons-cli/
-// TODO: parsi porttinumerot komentoriviltä
+// TODO: parsi portit komentoriviltä
 
 /**
  * Simple Mail Transfer Protocol
@@ -25,14 +23,10 @@ import smtp.SMTPServer;
 public class Main {
 	
 	public static void main(String[] args) {
-		
 		Inbox inbox = new Inbox();
 		SMTPServer.create(8025, inbox);
 		POP3Server.create(8110, inbox);
 		IMAPServer.create(8143, inbox);
-		
-		//Client client = new Client();
-		//User.create(System.in, client);
 		User.create(System.in);
 	}
 

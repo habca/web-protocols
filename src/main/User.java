@@ -15,6 +15,7 @@ import thread.*;
  * 
  * @author Harri Linna
  * @version 14.11.2020
+ * @version 18.11.2020, merged Client.java
  */
 public class User extends AThread {
 	

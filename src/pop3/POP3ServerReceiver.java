@@ -59,7 +59,6 @@ public class POP3ServerReceiver extends AThreadTCP {
 		};
 	}
 	
-	// TODO: private
 	public String printLIST() {
 		String format = "+OK %d messages (%d bytes)";
 		int total = inbox.size();
