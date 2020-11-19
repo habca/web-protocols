@@ -23,6 +23,7 @@ public class POP3Server extends AThreadServerSocket {
 		new Thread(this).start();
 	}
 	
+	@Override
 	public IThread onreceive() {
 		return new IThread() {
 

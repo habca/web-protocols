@@ -10,7 +10,6 @@ public class FTPClientReceiver extends AThreadSocket {
 	
 	public FTPClientReceiver(InetAddress addr, int port) throws IOException {
 		super(addr, port);
-		
 		new Thread(this).start();
 	}
 	

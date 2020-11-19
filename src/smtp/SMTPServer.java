@@ -25,6 +25,7 @@ public class SMTPServer extends AThreadServerSocket {
 		new Thread(this).start();
 	}
 	
+	@Override
 	public IThread onreceive() {
 		return new IThread() {
 

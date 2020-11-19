@@ -12,7 +12,6 @@ public class IMAPClient extends AThreadSocket implements IClient {
 	
 	public IMAPClient(InetAddress addr, int port) throws IOException {
 		super(addr, port);
-		
 		new Thread(this).start();
 	}
 	

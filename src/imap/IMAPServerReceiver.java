@@ -14,10 +14,8 @@ public class IMAPServerReceiver extends AThreadSocket {
 	
 	public IMAPServerReceiver(Socket socket, Inbox inbox) throws IOException {
 		super(socket);
-		
 		this.inbox = inbox;
 		setState(IIMAPServerState.stateLogin(this));
-		
 		new Thread(this).start();
 		
 		String format = "OK imap ready for requests from %s";

@@ -15,7 +15,6 @@ public class FTPClient extends AThreadSocket implements IClient {
 	
 	public FTPClient(InetAddress addr, int port) throws IOException {
 		super(addr, port);
-		
 		new Thread(this).start();
 	}
 	

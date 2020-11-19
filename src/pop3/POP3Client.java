@@ -20,7 +20,6 @@ public class POP3Client extends AThreadSocket implements IClient {
 	
 	public POP3Client(InetAddress addr, int port) throws IOException {
 		super(addr, port);
-		
 		new Thread(this).start();
 	}
 	

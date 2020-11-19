@@ -17,11 +17,9 @@ public class SMTPServerReceiver extends AThreadSocket {
 	
 	public SMTPServerReceiver(Socket socket, Inbox inbox) throws IOException {
 		super(socket);
-		
 		this.inbox = inbox;
 		setState(ISMTPServerState.stateInitial(this));
 		initHashMap();
-		
 		new Thread(this).start();
 		
 		String format = "220 %s Service ready";

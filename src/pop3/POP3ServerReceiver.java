@@ -14,10 +14,8 @@ public class POP3ServerReceiver extends AThreadSocket {
 	
 	public POP3ServerReceiver(Socket socket, Inbox inbox) throws IOException {
 		super(socket);
-		
 		this.inbox = inbox;
 		setState(IPOP3ServerState.stateLogin(this));
-		
 		new Thread(this).start();
 		
 		tcpSend("+OK this is pop3 greeting");

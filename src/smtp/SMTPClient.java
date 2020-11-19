@@ -22,7 +22,6 @@ public class SMTPClient extends AThreadSocket implements IClient {
 	
 	public SMTPClient(InetAddress addr, int port) throws IOException {
 		super(addr, port);
-		
 		new Thread(this).start();
 	}
 	
