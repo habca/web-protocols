@@ -6,7 +6,7 @@ import java.net.*;
 import main.*;
 import thread.*;
 
-public class FTPClientReceiver extends AThreadTCP {
+public class FTPClientReceiver extends AThreadSocket {
 	
 	public FTPClientReceiver(InetAddress addr, int port) throws IOException {
 		super(addr, port);

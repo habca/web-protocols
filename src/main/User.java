@@ -33,7 +33,8 @@ public class User extends AThread {
 		new Thread(this).start();
 	}
 	
-	private IThread onreceive() {
+	@Override
+	public IThread onreceive() {
 		return new IThread() {
 			
 			@Override
@@ -135,6 +136,11 @@ public class User extends AThread {
 			}
 			
 		};
+	}
+
+	@Override
+	public void onclose() throws IOException {
+		Main.onmessage("User input will be received no more");
 	}
 	
 }

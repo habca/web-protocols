@@ -16,7 +16,7 @@ import thread.*;
  * @version 9.11.2020, uses abstract class
  * @version 14.11.2020, removed extra states
  */
-public class SMTPClient extends AThreadTCP implements IClient {
+public class SMTPClient extends AThreadSocket implements IClient {
 
 	public static final String PROTOCOL = "smtp";
 	

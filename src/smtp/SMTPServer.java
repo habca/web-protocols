@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 
 import mail.*;
-import main.*;
 import thread.*;
 
 /**
@@ -16,30 +15,14 @@ import thread.*;
  * @version 5.11.2020, uses IThread
  * @version 9.11.2020, uses AThread
  */
-public class SMTPServer extends AThread {
+public class SMTPServer extends AThreadServerSocket {
 	
 	private Inbox inbox;
-	private ServerSocket socket;
 	
 	public SMTPServer(int port, Inbox inbox) throws IOException {
+		super(port);
 		this.inbox = inbox;
-		
-		socket = new ServerSocket(port);
-		setState(onreceive());
-		
 		new Thread(this).start();
-	}
-	
-	@Override
-	public void run() {
-		try {
-			while (!isClosed()) {
-				getState().run();
-			}
-			socket.close();
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
 	}
 	
 	public IThread onreceive() {
@@ -47,7 +30,7 @@ public class SMTPServer extends AThread {
 
 			@Override
 			public void run() throws IOException {
-				Socket client = socket.accept();
+				Socket client = accept();
 				new SMTPServerReceiver(client, inbox);
 			}
 			

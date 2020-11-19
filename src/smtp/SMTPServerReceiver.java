@@ -9,7 +9,7 @@ import java.util.*;
 import mail.*;
 import thread.*;
 
-public class SMTPServerReceiver extends AThreadTCP {
+public class SMTPServerReceiver extends AThreadSocket {
 
 	private Inbox inbox;
 	private ISMTPServerState state;

@@ -14,7 +14,7 @@ import thread.*;
  * @version 10.11.2020
  * @version 14.11.2020, removed extra states
  */
-public class POP3Client extends AThreadTCP implements IClient {
+public class POP3Client extends AThreadSocket implements IClient {
 	
 	public static final String PROTOCOL = "pop3";
 	
@@ -45,11 +45,11 @@ public class POP3Client extends AThreadTCP implements IClient {
 	@Override
 	public void help() {
 		Main.onmessage(
-				"The following are the POP3 commands:\n\n" +
-				"USER <SP> <username> <CRLF>\n" +
-				"PASS <SP> <password> <CRLF>\n" +
-				"LIST [<SP> <pathname>] <CRLF>\n" +
-				"QUIT <CRLF>"
+				"The following are the POP3 commands:\n" +
+				"USER <username>\n" +
+				"PASS <password>\n" +
+				"LIST [<pathname>]\n" +
+				"QUIT"
 		);
 	}
 	

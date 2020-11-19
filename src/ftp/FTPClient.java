@@ -6,7 +6,7 @@ import java.net.*;
 import main.*;
 import thread.*;
 
-public class FTPClient extends AThreadTCP implements IClient {
+public class FTPClient extends AThreadSocket implements IClient {
 	
 	public static final String PROTOCOL = "ftp";
 	

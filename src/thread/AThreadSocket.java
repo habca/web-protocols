@@ -13,32 +13,22 @@ import main.*;
  * @author Ville Paju
  * @version 18.11.2020
  */
-public abstract class AThreadTCP extends AThread {
+public abstract class AThreadSocket extends AThread {
 
 	private Socket socket;
 	
-	public AThreadTCP(InetAddress addr, int port) throws IOException {
+	public AThreadSocket(InetAddress addr, int port) throws IOException {
 		this.socket = new Socket(addr, port);
 	}
 	
-	public AThreadTCP(Socket socket) throws IOException {
+	public AThreadSocket(Socket socket) throws IOException {
 		this.socket = socket;
 	}
-
-	@Override
-	public void run() {
-		setState(onreceive());
-		try {
-			while (!isClosed()) {
-				getState().run();
-			}
-			socket.close();
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
-	}
 	
-	public abstract IThread onreceive();
+	@Override
+	public final void onclose() throws IOException {
+		socket.close();
+	}
 	
 	public final void tcpSend(String str) {
 		try {
@@ -57,7 +47,7 @@ public abstract class AThreadTCP extends AThread {
 		return reader.readLine();
 	}
 	
-	public InputStream getInputStream() throws IOException {
+	public final InputStream getInputStream() throws IOException {
 		return socket.getInputStream();
 	}
 	

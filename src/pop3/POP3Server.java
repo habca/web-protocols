@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 
 import mail.*;
-import main.*;
 import thread.*;
 
 /**
@@ -14,30 +13,14 @@ import thread.*;
  * @author Ville Paju
  * @version 10.11.2020
  */
-public class POP3Server extends AThread {
+public class POP3Server extends AThreadServerSocket {
 	
 	private Inbox inbox;
-	private ServerSocket socket;
 	
 	public POP3Server(int port, Inbox inbox) throws IOException {
+		super(port);
 		this.inbox = inbox;
-		
-		socket = new ServerSocket(port);
-		setState(onreceive());
-		
 		new Thread(this).start();
-	}
-	
-	@Override
-	public void run() {
-		try {
-			while (!isClosed()) {
-				getState().run();
-			}
-			socket.close();
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
 	}
 	
 	public IThread onreceive() {
@@ -45,7 +28,7 @@ public class POP3Server extends AThread {
 
 			@Override
 			public void run() throws IOException {
-				Socket client = socket.accept();
+				Socket client = accept();
 				new POP3ServerReceiver(client, inbox);
 			}
 			

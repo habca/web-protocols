@@ -1,6 +1,6 @@
 package main;
 
-import java.io.IOException;
+import java.io.*;
 
 import imap.*;
 import mail.*;

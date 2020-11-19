@@ -18,15 +18,21 @@ public abstract class AThread implements Runnable {
 	private IThread runner;
 	
 	@Override
-	public void run() {
+	public final void run() {
+		setState(onreceive());
 		try {
 			while (!isClosed()) {
 				getState().run();
 			}
+			onclose();
 		} catch (IOException e) {
 			Main.onerror(e);
 		}
 	}
+	
+	public abstract IThread onreceive();
+	
+	public abstract void onclose() throws IOException;
 	
 	public final void setState(IThread state) {
 		runner = state;

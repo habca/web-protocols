@@ -6,7 +6,7 @@ import java.net.*;
 import main.*;
 import thread.*;
 
-public class IMAPClient extends AThreadTCP implements IClient {
+public class IMAPClient extends AThreadSocket implements IClient {
 
 	public static final String PROTOCOL = "imap";
 	

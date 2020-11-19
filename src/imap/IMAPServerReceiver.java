@@ -7,7 +7,7 @@ import java.util.*;
 import mail.*;
 import thread.*;
 
-public class IMAPServerReceiver extends AThreadTCP {
+public class IMAPServerReceiver extends AThreadSocket {
 
 	private Inbox inbox;
 	private IIMAPServerState state;
