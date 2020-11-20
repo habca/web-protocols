@@ -39,6 +39,10 @@ public class POP3Client extends AThreadSocket implements IClient {
 	@Override
 	public void send(String str) {
 		tcpSend(str);
+		
+		if (str.equals("QUIT")) {
+			close();
+		}
 	}
 
 	@Override

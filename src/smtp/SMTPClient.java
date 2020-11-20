@@ -33,6 +33,11 @@ public class SMTPClient extends AThreadSocket implements IClient {
 			public void run() throws IOException {
 				String str = tcpReceive();
 				Main.onmessage(str);
+				
+				if (str.startsWith("221")) {
+					close();
+				}
+				
 			}
 			
 		};

@@ -8,6 +8,7 @@ import ftp.*;
 import imap.*;
 import pop3.*;
 import smtp.*;
+import tftp.*;
 import thread.*;
 
 /**
@@ -52,7 +53,8 @@ public class User extends AThread {
 				if (input.startsWith("smtp") ||
 						input.startsWith("pop3") ||
 						input.startsWith("imap") ||
-						input.startsWith("ftp")) {
+						input.startsWith("ftp") ||
+						input.startsWith("tftp")) {
 					parseClient(input);
 					return;
 				}
@@ -98,6 +100,14 @@ public class User extends AThread {
 		if (protocol.equals(FTPClient.PROTOCOL)) {
 			client.close();
 			client = new FTPClient(addr, port);
+			return true;
+		}
+		
+		if (protocol.equals(TFTPClient.PROTOCOL)) {
+			InetAddress host_addr = InetAddress.getLocalHost();
+			int src_port = 8069;
+			client.close();
+			client = new TFTPClient(host_addr, addr, src_port, port);
 			return true;
 		}
 		

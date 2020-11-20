@@ -38,8 +38,17 @@ public abstract class AThreadDatagramSocket extends AThread {
 	
 	public final void udpSend(String str, InetAddress addr, int port) {
 		try {
-			byte[] data = str.getBytes();
-			DatagramPacket packet = new DatagramPacket(data, data.length, addr, port);
+			byte[] arr = str.getBytes();
+			DatagramPacket packet = new DatagramPacket(arr, arr.length, addr, port);
+			socket.send(packet);
+		} catch (IOException e) {
+			Main.onerror(e);
+		}
+	}
+	
+	public final void udpSend(byte[] arr, InetAddress addr, int port) {
+		try {
+			DatagramPacket packet = new DatagramPacket(arr, arr.length, addr, port);
 			socket.send(packet);
 		} catch (IOException e) {
 			Main.onerror(e);
