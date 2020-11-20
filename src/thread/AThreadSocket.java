@@ -6,6 +6,8 @@ import java.net.*;
 import main.*;
 
 /**
+ * Thread for receiving TCP-packets
+ * 
  * Huom! Konstruktorin viimeinen rivi:
  *       new Thread(this).start();
  * 

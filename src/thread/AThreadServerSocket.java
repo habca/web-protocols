@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 
 /**
+ * Thread for establishing TCP connections
+ * 
  * Huom! Konstruktorin viimeinen rivi:
  *       new Thread(this).start();
  * 
