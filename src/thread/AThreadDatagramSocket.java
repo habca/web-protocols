@@ -48,20 +48,27 @@ public abstract class AThreadDatagramSocket extends AThread {
 	
 	public final void udpSend(byte[] arr, InetAddress addr, int port) {
 		try {
+			Thread.sleep((long) 100); // sync delay
 			DatagramPacket packet = new DatagramPacket(arr, arr.length, addr, port);
 			socket.send(packet);
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			Main.onerror(e);
 		}
 	}
 	
+	public final byte[] udpReceive() throws IOException {
+		DatagramPacket packet = new DatagramPacket(new byte[size], size);
+		socket.receive(packet);
+		return packet.getData();
+	}
+	
+	/*
 	public final String udpReceive() throws IOException {
 		DatagramPacket packet = new DatagramPacket(new byte[size], size);
 		socket.receive(packet);
 		return new String(packet.getData(), 0, packet.getLength());
 	}
 	
-	/*
 	public final DatagramPacket udpReceive() throws IOException {
 		DatagramPacket packet = new DatagramPacket(new byte[size], size);
 		socket.receive(packet);

@@ -14,7 +14,23 @@
 
    The TFTP header of a packet contains the  opcode  associated  with
    that packet.
+   
 
+            2 bytes     string    1 byte     string   1 byte
+            ------------------------------------------------
+           | Opcode |  Filename  |   0  |    Mode    |   0  |
+            ------------------------------------------------
+
+                       Figure 5-1: RRQ/WRQ packet
+
+
+   RRQ and WRQ packets (opcodes 1 and 2 respectively) have the format
+   shown in Figure 5-1.  The file name is a sequence of bytes in
+   netascii terminated by a zero byte.  The mode field contains the
+   string "netascii", "octet", or "mail" (or any combination of upper
+   and lower case, such as "NETASCII", NetAscii", etc.) in netascii
+   indicating the three modes defined in the protocol.
+   
 I. Appendix
 
 TFTP Formats
