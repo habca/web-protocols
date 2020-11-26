@@ -104,10 +104,9 @@ public class User extends AThread {
 		}
 		
 		if (protocol.equals(TFTPClient.PROTOCOL)) {
-			InetAddress host_addr = InetAddress.getLocalHost();
-			int src_port = 8069;
+			int src_port = 8070; // 8069+1
 			client.close();
-			client = new TFTPClient(host_addr, addr, src_port, port);
+			client = new TFTPClient(src_port, addr, port);
 			return true;
 		}
 		
@@ -124,12 +123,14 @@ public class User extends AThread {
 
 			@Override
 			public void help() {
+				// TODO: käytä portteja jotka saatu komentoriviltä
 				Main.onmessage(
 						"The following are the terminal commands:\n" +
-						"smtp <host> <port>\n" +
-						"pop3 <host> <port>\n" +
-						"imap <host> <port>\n" +
+						"smtp localhost 8025\n" +
+						"pop3 localhost 8110\n" +
+						"imap localhost 8143\n" +
 						"ftp <host> <port>\n" +
+						"tftp localhost 8069\n" +
 						"help\n" +
 						"quit"
 				);

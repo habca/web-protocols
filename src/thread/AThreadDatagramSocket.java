@@ -20,13 +20,12 @@ public abstract class AThreadDatagramSocket extends AThread {
 	private DatagramSocket socket;
 	private int size;
 	
-	public AThreadDatagramSocket(InetAddress addr, int port, int size) throws SocketException {
-		this.socket = new DatagramSocket(port, addr);
+	public AThreadDatagramSocket(InetAddress src_addr, int src_port, int size) throws SocketException {
+		socket = new DatagramSocket(src_port, src_addr);
 		this.size = size;
 	}
 	
-	public AThreadDatagramSocket(DatagramSocket socket, int size)
-	{
+	public AThreadDatagramSocket(DatagramSocket socket, int size) {
 		this.socket = socket;
 		this.size = size;
 	}
@@ -36,44 +35,38 @@ public abstract class AThreadDatagramSocket extends AThread {
 		socket.close();
 	}
 	
+	/*
 	public final void udpSend(String str, InetAddress addr, int port) {
-		try {
-			byte[] arr = str.getBytes();
-			DatagramPacket packet = new DatagramPacket(arr, arr.length, addr, port);
-			socket.send(packet);
-		} catch (IOException e) {
-			Main.onerror(e);
-		}
+		udpSend(str.getBytes(), addr, port);
 	}
 	
 	public final void udpSend(byte[] arr, InetAddress addr, int port) {
+		udpSend(new DatagramPacket(arr, arr.length, addr, port));
+	}
+	*/
+	
+	/**
+	 * Kaikki lähtevät UDP-paketit kulkevat tätä kautta.
+	 * @param packet Lähtevä UDP-paketti
+	 */
+	public final void udpSend(DatagramPacket packet) {
 		try {
 			Thread.sleep((long) 100); // sync delay
-			DatagramPacket packet = new DatagramPacket(arr, arr.length, addr, port);
-			socket.send(packet);
+			socket.send(packet); // save to previous packet
 		} catch (IOException | InterruptedException e) {
 			Main.onerror(e);
 		}
 	}
 	
-	public final byte[] udpReceive() throws IOException {
-		DatagramPacket packet = new DatagramPacket(new byte[size], size);
-		socket.receive(packet);
-		return packet.getData();
-	}
-	
-	/*
-	public final String udpReceive() throws IOException {
-		DatagramPacket packet = new DatagramPacket(new byte[size], size);
-		socket.receive(packet);
-		return new String(packet.getData(), 0, packet.getLength());
-	}
-	
+	/**
+	 * Kaikki saapuvat UDP-paketit kulkevat tätä kautta.
+	 * @return Onnistuneesti vastaanotettu UDP-paketti
+	 * @throws IOException Vastaanottaminen voi epäonnistua
+	 */
 	public final DatagramPacket udpReceive() throws IOException {
 		DatagramPacket packet = new DatagramPacket(new byte[size], size);
 		socket.receive(packet);
 		return packet;
 	}
-	*/
 	
 }

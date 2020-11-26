@@ -6,6 +6,7 @@ import imap.*;
 import mail.*;
 import pop3.*;
 import smtp.*;
+import tftp.*;
 
 // TODO: http://commons.apache.org/proper/commons-cli/
 // TODO: parsi portit komentoriviltä
@@ -30,6 +31,7 @@ public class Main {
 			new SMTPServer(8025, inbox);
 			new POP3Server(8110, inbox);
 			new IMAPServer(8143, inbox);
+			new TFTPServer(8069);
 			new User(System.in);
 		} catch (IOException e) {
 			Main.onerror(e);

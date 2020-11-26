@@ -2,10 +2,12 @@ package main;
 
 import static org.junit.Assert.*;
 
+import org.junit.*;
+
+import ftp.*;
+
 import java.util.*;
 import java.util.regex.*;
-
-import org.junit.*;
 
 /**
  * Staattinen apufunktio-kirjasto
@@ -33,7 +35,7 @@ public final class Static {
 	@SafeVarargs
 	public static <T> void append(StringBuilder sb, T... str) {
 		for (int i = 0; i < str.length; i++) {
-			sb.append(str[i]);
+			sb.append(str[i].toString());
 		}
 	}
 	
@@ -54,72 +56,23 @@ public final class Static {
 		return arr;
 	}
 	
-	public static String extractAddress(String str) {
-		StringBuilder sb = new StringBuilder();
-		Integer[] arr = extractNumbers(str);
-		
-		append(sb, arr[1]);
-		append(sb, '.', arr[2]);
-		append(sb, '.', arr[3]);
-		append(sb, '.', arr[4]);
-		
-		return sb.toString();
+	public static int bytesToInt(byte[] arr) {
+		return 0; // TODO: toteuta ja testaa
 	}
 	
-	public static int extractPort(String str) {
-		Integer[] arr = extractNumbers(str);
-		int last = arr.length - 1;
-		return calcPort(arr[last-1], arr[last]);
+	public static byte[] intToBytes(int num) {
+		return null; // TODO: toteuta ja testaa
 	}
-
-    public static int calcPort(int p1, int p2) {
-        return (p1 * 256) + p2;
-    }
-    
-    public static String extractFile(String prefix, String str) {
-    	String[] arr = str.split(prefix);
-    	StringBuilder sb = new StringBuilder();
-    	for (int i = 1; i < arr.length; i++) {
-    		sb.append(arr[i].trim());
-    	}
-		return sb.toString();
-    }
-    
-    public static class StaticTest {
-    	private static final  String PASV = 
-    			"227 Entering Passive Mode (193,166,3,2,155,200)";
-    	@Test
-    	public void testCalcPort() {
-    		String error = "Portti lasketaan väärin:";
-    		
-    		assertEquals(error, 0, Static.calcPort(0,0));
-    		assertEquals(error, 1, Static.calcPort(0,1));
-    		assertEquals(error, 256, Static.calcPort(1,0));
-    		assertEquals(error, 257, Static.calcPort(1,1));
-    	}
-    	@Test
-    	public void testExtractNumber() {
-    		String error = "Numerot parsitaan väärin:";
-    		Integer[] result = new Integer[] {227,193,166,3,2,155,200};
-    		Integer[] test = Static.extractNumbers(PASV);
-    		assertEquals(error, true, Static.compare(test, result));
-    	}
-    	@Test
-    	public void testExtractPort() {
-    		String error = "Portti parsitaan väärin:";
-    		assertEquals(error, Static.calcPort(155,200), Static.extractPort(PASV));
-    	}
-    	@Test
-    	public void testExtractAddress() {
-    		String error = "IP-osoite parsitaan väärin:";
-    		assertEquals(error, "193.166.3.2", Static.extractAddress(PASV));
-    	}
-    	@Test
-    	public void testExtractFile() {
-    		String error = "Tiedostonimi parsitaan väärin:";
-    		assertEquals(error, "file", Static.extractFile("RETR", "RETR file"));
-    		assertEquals(error, "", Static.extractFile("RETR", "RETR"));
-    	}
-    }
+	
+	public static class TestStatic {
+		@Test
+		public void testByteToInt() {
+			String error = "Kokonaisluku muunnetaan väärin:";
+			byte[] arr1 = new byte[] {(byte) 0, (byte) 1};
+			byte[] arr2 = new byte[] {(byte) 155, (byte) 200};
+			assertEquals(error, 1, bytesToInt(arr1));
+			assertEquals(error, FTPClient.calcPort(155,200), bytesToInt(arr2));
+		}
+	}
 	
 }
