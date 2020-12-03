@@ -58,7 +58,6 @@ public class User extends AThread {
 					parseClient(input);
 					return;
 				}
-				
 				client.send(input); // send to client
 			}
 			

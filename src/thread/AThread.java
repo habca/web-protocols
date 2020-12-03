@@ -28,6 +28,7 @@ public abstract class AThread implements Runnable {
 		} catch (IOException e) {
 			Main.onerror(e);
 		}
+		
 	}
 	
 	public abstract IThread onreceive();

@@ -30,6 +30,7 @@ public abstract class AThreadSocket extends AThread {
 	@Override
 	public final void onclose() throws IOException {
 		socket.close();
+		Main.onmessage("Socket was closed");
 	}
 	
 	public final void tcpSend(String str) {

@@ -6,6 +6,7 @@ import org.junit.*;
 
 import ftp.*;
 
+import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
@@ -57,11 +58,11 @@ public final class Static {
 	}
 	
 	public static int bytesToInt(byte[] arr) {
-		return 0; // TODO: toteuta ja testaa
+		return 0; // TODO: ???
 	}
 	
 	public static byte[] intToBytes(int num) {
-		return null; // TODO: toteuta ja testaa
+		return new byte[2]; // TODO: ???
 	}
 	
 	public static class TestStatic {

@@ -33,6 +33,7 @@ public abstract class AThreadDatagramSocket extends AThread {
 	@Override
 	public final void onclose() throws IOException {
 		socket.close();
+		Main.onmessage("DatagramSocket was closed");
 	}
 	
 	/*

@@ -3,6 +3,7 @@ package tftp;
 import java.io.*;
 import java.net.*;
 
+import fi.jyu.mit.ohj2.Mjonot;
 import main.*;
 import thread.*;
 
@@ -11,6 +12,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 	public static final String PROTOCOL = "tftp";
 	
 	private DatagramPacket previous;
+	private FileReaderWriter manager;
 	
 	private InetAddress addr;
 	private int port;
@@ -35,8 +37,30 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 			public void run() throws IOException {
 				TFTPPacket packet = new TFTPPacket(udpReceive());
 				
-				Main.onmessage("Client: response arrived");
-				// Tässä pitäisi tehdä mitä?
+				// RRQ or WRQ was accepted
+				if (packet.getOpcode() == 4) {
+					
+					// File manager for reading or writing a file
+					TFTPPacket prev = new TFTPPacket(previous);
+					manager = new FileReaderWriter(prev.getFileName());
+					
+					// RRQ was accepted
+					if (prev.getOpcode() == 1) {
+						setState(onrrq());
+					}
+					
+					// WRQ was accepted
+					if (prev.getOpcode() == 2) {
+						setState(onwrq());
+					}
+					
+				}
+				
+				// RRQ or WRQ was rejected
+				if (packet.getOpcode() == 5) {
+					// TODO: parsi virheteksti
+					Main.onmessage("error text here");
+				}
 			}
 			
 		};
@@ -44,17 +68,21 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 
 	@Override
 	public void send(String str) throws IOException {
+		StringBuilder sb = new StringBuilder(str);
 		
-		Main.onmessage("Client: request sent");
+		// parse arguments for RRQ or WRQ
+		String command = Mjonot.erota(sb);
+		String filename = Mjonot.erota(sb);
+		String mode = Mjonot.erota(sb);
 		
-		if (str.startsWith("RRQ")) {
-			udpSend(previous = TFTPPacket.rrq(str, addr, port));
-			setState(onrrq());
+		// send UDP-packet for RRQ 
+		if (command.equals("RRQ")) {
+			udpSend(previous = TFTPPacket.rrq(filename, mode, addr, port));
 		}
 		
-		if (str.startsWith("WRQ")) {
-			udpSend(previous = TFTPPacket.wrq(str, addr, port));
-			setState(onwrq());
+		// send UDP-packet for WRQ
+		if (command.equals("WRQ")) {
+			udpSend(previous = TFTPPacket.wrq(filename, mode, addr, port));
 		}
 	}
 
@@ -63,7 +91,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 		Main.onmessage(
 				"The following are the TFTP commands:\n" +
 				"RRQ <filename> octet\n" +
-				"WRQ <filename>"
+				"WRQ <filename> octet"
 		);
 	}
 	
@@ -74,12 +102,15 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 			public void run() throws IOException {
 				TFTPPacket packet = new TFTPPacket(udpReceive());
 				
-				// TODO: kirjoita tiedoston loppuun
+				// received UDP-packet for DATA
+				if (packet.getOpcode() == 3) {
+					manager.write(packet.getFileData());
+					udpSend(previous = packet.ack());
+				}
 				
-				udpSend(packet.ack());
-				
+				// last packet was received, close connection
 				if (packet.getLength() < TFTPPacket.MAX_SIZE) {
-					close(); // last packet received
+					close();
 				}
 			}
 			
@@ -95,10 +126,6 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 			}
 			
 		};
-	}
-	
-	private void udpResend() {
-		udpSend(previous);
 	}
 	
 }

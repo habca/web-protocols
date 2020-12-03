@@ -3,6 +3,8 @@ package thread;
 import java.io.*;
 import java.net.*;
 
+import main.Main;
+
 /**
  * Thread for establishing TCP connections
  * 
@@ -24,6 +26,7 @@ public abstract class AThreadServerSocket extends AThread {
 	@Override
 	public final void onclose() throws IOException {
 		socket.close();
+		Main.onmessage("ServerSocket was closed");
 	}
 	
 	public final Socket accept() throws IOException {
