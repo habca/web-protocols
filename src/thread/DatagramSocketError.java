@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import main.*;
+
 /**
  * Soketti gerenoi satunnasia virheitä. 
  * Oletuksena virheetön tiedonsiirto.
@@ -40,12 +42,12 @@ public class DatagramSocketError extends DatagramSocket {
 				// vastaanoton satunnainen viive
 				Thread.sleep((long) intRange(0, delayms));
 			} catch (InterruptedException e) {
-				System.err.println("Thread.sleep was interrupted");
+				Main.onerror(e);
 			}
 
 			// pudotetaan satunnainen paketti
 			if (rand.nextDouble() < droprate) {
-				System.out.println("Dropped packet");
+				Main.onerror(new Exception("Dropped packet"));
 				continue;
 			}
 
