@@ -25,7 +25,7 @@ public class TFTPServer extends AThreadDatagramSocket {
 				TFTPPacket packet = new TFTPPacket(udpReceive());
 				
 				// File manager for reading or writing a file
-				manager = new FileReaderWriter(packet.getFileName());
+				manager = new FileReaderWriter(packet.getFileName(), 512); // RFF 1350
 				
 				// received UDP-packet for RRQ
 				if (packet.getOpcode() == 1) {
@@ -48,7 +48,7 @@ public class TFTPServer extends AThreadDatagramSocket {
 
 			@Override
 			public void run() throws IOException {
-				/*
+				
 				if (!manager.hasNext()) {
 					setState(onreceive());
 					return;
@@ -56,20 +56,12 @@ public class TFTPServer extends AThreadDatagramSocket {
 				
 				TFTPPacket prev = new TFTPPacket(previous);
 				byte[] block = prev.nextBlock();
-				byte[] arr = manager.read(512); // RFC 1350
-				udpSend(previous = TFTPPacket.data(arr, block));
-				TFTPPacket packet = new TFTPPacket(udpReceive());
-				*/
+				byte[] data = manager.next();
 				
-				TFTPPacket prev = new TFTPPacket(previous);
-				byte[] block = prev.nextBlock();
-				byte[] arr = manager.read();
-				udpSend(previous = TFTPPacket.data(arr, block,
+				udpSend(previous = TFTPPacket.data(data, block,
 						previous.getAddress(), previous.getPort()
 				));
 				TFTPPacket packet = new TFTPPacket(udpReceive());
-				
-				setState(onreceive());
 			}
 			
 		};
@@ -80,7 +72,18 @@ public class TFTPServer extends AThreadDatagramSocket {
 
 			@Override
 			public void run() throws IOException {
-				// TODO Auto-generated method stub
+				TFTPPacket packet = new TFTPPacket(udpReceive());
+				
+				// received UDP-packet for DATA
+				if (packet.getOpcode() == 3) {
+					FileReaderWriter.write(manager.getName(), packet.getFileData());
+					udpSend(previous = packet.ack());
+				}
+				
+				// last packet was received, close connection
+				if (packet.getLength() < TFTPPacket.MAX_SIZE) {
+					setState(onreceive());
+				}
 			}
 			
 		};

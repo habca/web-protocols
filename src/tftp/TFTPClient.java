@@ -42,7 +42,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 					
 					// File manager for reading or writing a file
 					TFTPPacket prev = new TFTPPacket(previous);
-					manager = new FileReaderWriter(prev.getFileName());
+					manager = new FileReaderWriter(prev.getFileName(), 512); // RFC 1350
 					
 					// RRQ was accepted
 					if (prev.getOpcode() == 1) {
@@ -104,13 +104,13 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 				
 				// received UDP-packet for DATA
 				if (packet.getOpcode() == 3) {
-					manager.write(packet.getFileData());
+					FileReaderWriter.write(manager.getName(), packet.getFileData());
 					udpSend(previous = packet.ack());
 				}
 				
 				// last packet was received, close connection
 				if (packet.getLength() < TFTPPacket.MAX_SIZE) {
-					close();
+					setState(onreceive());
 				}
 			}
 			
@@ -122,7 +122,20 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 
 			@Override
 			public void run() throws IOException {
-				// TODO Auto-generated method stub
+				
+				if (!manager.hasNext()) {
+					setState(onreceive());
+					return;
+				}
+				
+				TFTPPacket prev = new TFTPPacket(previous);
+				byte[] block = prev.nextBlock();
+				byte[] data = manager.next();
+				
+				udpSend(previous = TFTPPacket.data(data, block,
+						previous.getAddress(), previous.getPort()
+				));
+				TFTPPacket packet = new TFTPPacket(udpReceive());
 			}
 			
 		};

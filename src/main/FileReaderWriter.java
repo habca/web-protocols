@@ -1,25 +1,27 @@
 package main;
 
 import java.io.*;
-import java.nio.file.*;
 import java.util.*;
 
-public class FileReaderWriter {
+public class FileReaderWriter extends File implements Iterator<byte[]> {
 	
-	private static final String SUFFIX = "-tftp";
+	private static final long serialVersionUID = 1L;
 	
-	private final String file;
-	private int mark;
+	private byte[] data;
+	private int step;
 	
-	public FileReaderWriter(String file) {
-		this.file = file;
-		this.mark = 0;
-	}
-	
-	public byte[] read() throws IOException {
-		byte[] arr = Files.readAllBytes(Paths.get(file));
-		return Arrays.copyOfRange(arr, mark, mark+511);
-		// TODO: Älä lue koko tiedostoa ja poista kovakoodaus
+	public FileReaderWriter(String file, int step) {
+		super(file);
+		
+		this.step = step;
+		
+		// read file into a byte array
+		data = new byte[(int) this.length()];
+		try (InputStream is = new FileInputStream(this)) {
+			is.read(data);
+		} catch (IOException e) {
+	    	Main.onerror(e);
+	    }
 	}
 	
 	/*
@@ -34,13 +36,30 @@ public class FileReaderWriter {
 	}
 	*/
 	
-	public void write(String data) {
-		String filename = String.format("%s%s", file, SUFFIX);
-		try (PrintStream fo = new PrintStream(new FileOutputStream(filename, true))) { 
+	public static void write(String filename, String data) {
+		try (PrintStream fo = new PrintStream(new FileOutputStream(new File(filename), true))) { 
 			fo.print(data);
 		} catch (FileNotFoundException e) {
 			Main.onerror(e);
 		}
 	}
 
+	@Override
+	public boolean hasNext() {
+		return data.length > 0;
+	}
+
+	@Override
+	public byte[] next() {
+		if (data.length < step) {
+			byte[] arr = Arrays.copyOf(data, data.length);
+			data = new byte[0];
+			return arr;
+		}
+		
+		byte[] arr = Arrays.copyOf(data, step);
+		data = Arrays.copyOfRange(data, step, data.length);
+		return arr;
+	}
+	
 }
