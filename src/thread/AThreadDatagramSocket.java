@@ -17,15 +17,19 @@ import main.Main;
  */
 public abstract class AThreadDatagramSocket extends AThread {
 
-	private DatagramSocket socket;
+	private DatagramSocketError socket;
 	private int size;
 	
 	public AThreadDatagramSocket(InetAddress src_addr, int src_port, int size) throws SocketException {
-		socket = new DatagramSocket(src_port, src_addr);
+		socket = new DatagramSocketError(src_port, src_addr);
 		this.size = size;
 	}
 	
-	public AThreadDatagramSocket(DatagramSocket socket, int size) {
+	public final void setErrorRates(double drop, double error, int delay) {
+		socket.setErrorRates(drop, error, delay);
+	}
+	
+	public AThreadDatagramSocket(DatagramSocketError socket, int size) {
 		this.socket = socket;
 		this.size = size;
 	}
@@ -64,7 +68,7 @@ public abstract class AThreadDatagramSocket extends AThread {
 	 * @return Onnistuneesti vastaanotettu UDP-paketti
 	 * @throws IOException Vastaanottaminen voi epäonnistua
 	 */
-	public final DatagramPacket udpReceive() throws IOException {
+	public DatagramPacket udpReceive() throws IOException {
 		DatagramPacket packet = new DatagramPacket(new byte[size], size);
 		socket.receive(packet);
 		return packet;
