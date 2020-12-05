@@ -13,7 +13,6 @@ import thread.*;
 
 /**
  * Simple textual user interface
- * 
  * @author Harri Linna
  * @version 14.11.2020
  * @version 18.11.2020, merged Client.java

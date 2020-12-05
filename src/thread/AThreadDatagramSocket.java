@@ -3,7 +3,8 @@ package thread;
 import java.io.*;
 import java.net.*;
 
-import main.Main;
+import main.*;
+import packet.DatagramSocketError;
 
 /**
  * Thread for receiving UDP-packets
@@ -39,16 +40,6 @@ public abstract class AThreadDatagramSocket extends AThread {
 		socket.close();
 		Main.onmessage("DatagramSocket was closed");
 	}
-	
-	/*
-	public final void udpSend(String str, InetAddress addr, int port) {
-		udpSend(str.getBytes(), addr, port);
-	}
-	
-	public final void udpSend(byte[] arr, InetAddress addr, int port) {
-		udpSend(new DatagramPacket(arr, arr.length, addr, port));
-	}
-	*/
 	
 	/**
 	 * Kaikki lähtevät UDP-paketit kulkevat tätä kautta.

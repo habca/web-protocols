@@ -3,6 +3,11 @@ package main;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Reads and writes from/to a file
+ * @author Harri Linna
+ * @version 4.12.2020
+ */
 public class FileReaderWriter extends File implements Iterator<byte[]> {
 	
 	private static final long serialVersionUID = 1L;

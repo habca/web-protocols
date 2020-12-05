@@ -1,4 +1,4 @@
-package thread;
+package packet;
 
 import java.io.*;
 import java.net.*;

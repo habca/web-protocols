@@ -42,7 +42,8 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 					
 					// File manager for reading or writing a file
 					TFTPPacket prev = new TFTPPacket(previous);
-					manager = new FileReaderWriter(prev.getFileName(), 512); // RFC 1350
+					// 512 bytes RFC - 1 byte CRC8 = 511 bytes
+					manager = new FileReaderWriter(prev.getFileName(), 511); // RFC 1350
 					
 					// RRQ was accepted
 					if (prev.getOpcode() == 1) {
@@ -77,12 +78,12 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 		
 		// send UDP-packet for RRQ 
 		if (command.equals("RRQ")) {
-			udpSend(previous = TFTPPacket.rrq(filename, mode, addr, port));
+			udpSend(previous = TFTPPacket.make_rrq(filename, mode, addr, port));
 		}
 		
 		// send UDP-packet for WRQ
 		if (command.equals("WRQ")) {
-			udpSend(previous = TFTPPacket.wrq(filename, mode, addr, port));
+			udpSend(previous = TFTPPacket.make_wrq(filename, mode, addr, port));
 		}
 	}
 
@@ -90,8 +91,8 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 	public void help() {
 		Main.onmessage(
 				"The following are the TFTP commands:\n" +
-				"RRQ <filename> octet\n" +
-				"WRQ <filename> octet"
+				"RRQ <filename>\n" +
+				"WRQ <filename>"
 		);
 	}
 	
@@ -104,12 +105,13 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 				
 				// received UDP-packet for DATA
 				if (packet.getOpcode() == 3) {
-					FileReaderWriter.write(manager.getName(), packet.getFileData());
-					udpSend(previous = packet.ack());
+					FileReaderWriter.write(manager.getName(), packet.toString());
+					udpSend(previous = TFTPPacket.make_ack(packet));
 				}
 				
 				// last packet was received, close connection
 				if (packet.getLength() < TFTPPacket.MAX_SIZE) {
+					Main.onmessage("RRQ completed");
 					setState(onreceive());
 				}
 			}
@@ -132,7 +134,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 				byte[] block = prev.nextBlock();
 				byte[] data = manager.next();
 				
-				udpSend(previous = TFTPPacket.data(data, block,
+				udpSend(previous = TFTPPacket.make_data(data, block,
 						previous.getAddress(), previous.getPort()
 				));
 				TFTPPacket packet = new TFTPPacket(udpReceive());

@@ -25,18 +25,19 @@ public class TFTPServer extends AThreadDatagramSocket {
 				TFTPPacket packet = new TFTPPacket(udpReceive());
 				
 				// File manager for reading or writing a file
-				manager = new FileReaderWriter(packet.getFileName(), 512); // RFF 1350
+				// 512 bytes RFC - 1 byte CRC8 = 511 bytes
+				manager = new FileReaderWriter(packet.getFileName(), 511); // RFF 1350
 				
 				// received UDP-packet for RRQ
 				if (packet.getOpcode() == 1) {
 					setState(onrrq());
-					udpSend(previous = packet.ack());
+					udpSend(previous = TFTPPacket.make_ack(packet));
 				}
 				
 				// received UDP-packet for WRQ
 				if (packet.getOpcode() == 2) {
 					setState(onwrq());
-					udpSend(previous = packet.ack());
+					udpSend(previous = TFTPPacket.make_ack(packet));
 				}
 			}
 			
@@ -58,7 +59,7 @@ public class TFTPServer extends AThreadDatagramSocket {
 				byte[] block = prev.nextBlock();
 				byte[] data = manager.next();
 				
-				udpSend(previous = TFTPPacket.data(data, block,
+				udpSend(previous = TFTPPacket.make_data(data, block,
 						previous.getAddress(), previous.getPort()
 				));
 				TFTPPacket packet = new TFTPPacket(udpReceive());
@@ -76,8 +77,8 @@ public class TFTPServer extends AThreadDatagramSocket {
 				
 				// received UDP-packet for DATA
 				if (packet.getOpcode() == 3) {
-					FileReaderWriter.write(manager.getName(), packet.getFileData());
-					udpSend(previous = packet.ack());
+					FileReaderWriter.write(manager.getName(), packet.toString());
+					udpSend(previous = TFTPPacket.make_ack(packet));
 				}
 				
 				// last packet was received, close connection

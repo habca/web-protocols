@@ -13,7 +13,6 @@ import tftp.*;
 
 /**
  * Simple Mail Transfer Protocol
- * 
  * @author Harri Linna
  * @author Ville Paju
  * @version 2.11.2020
@@ -35,6 +34,7 @@ public class Main {
 			new User(System.in);
 		} catch (IOException e) {
 			Main.onerror(e);
+			e.printStackTrace();
 		}
 	}
 

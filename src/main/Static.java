@@ -6,7 +6,6 @@ import org.junit.*;
 
 import ftp.*;
 
-import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
@@ -22,6 +21,7 @@ public final class Static {
 		super();
 	}
 	
+	// ei toimi primitiivi taulukoille, käytä Arrays.equals
 	public static <T> boolean compare(T[] arr1, T[] arr2) {
     	if (arr1.length != arr2.length) return false;
     	if (arr1 == null || arr2 == null) return false;

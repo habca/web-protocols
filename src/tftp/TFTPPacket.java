@@ -2,11 +2,18 @@ package tftp;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
-import ftp.FTPClient;
+import ftp.*;
 import main.*;
+import packet.*;
 
-public class TFTPPacket extends APacket {
+/**
+ * UDP-packet for TFTP-protocol
+ * @author Harri Linna
+ * @version 5.12.2020
+ */
+public class TFTPPacket extends APacketError {
 	
 	public static final int MAX_SIZE = 516; // RFC 1350
 	
@@ -25,44 +32,50 @@ public class TFTPPacket extends APacket {
 		super(packet);
 	}
 	
-	private int size() {
-		return getData().length;
-	}
-	
-	public TFTPPacket(byte[] arr, InetAddress addr, int port) {
-		super(new DatagramPacket(arr, arr.length, addr, port));
-	}
-	
 	public byte[] getBlock() {
-		int opcode = getOpcode();
-		if (opcode == 3 || opcode == 4) {
-			return new byte[] {getData()[2], getData()[3]};
-		}
-		return new byte[2];
+		assert getOpcode() == 3 || getOpcode() == 4; // data or ack
+		return new byte[] { 
+				getData()[2], getData()[3] 
+		};
+	}
+	
+	public byte[] nextBlock() {
+		int current = Static.bytesToInt(getBlock());
+		return Static.intToBytes(current + 1);
 	}
 	
 	public int getOpcode() {
 		return FTPClient.calcPort(getData()[0], getData()[1]);
 	}
 	
+	public boolean isACK(TFTPPacket packet) {
+		return !isCorrupted() && getOpcode() == 4 && 
+				Arrays.equals(getBlock(), packet.getBlock()
+		);
+	}
+	
 	public String getFileName() {
 		final int start = 2;
-		int count = 0;
-		for (int i = start; i < size(); i++) {
+		int end = -1;
+		for (int i = start; i < getLength(); i++) {
 			if (getData()[i] == (byte) 0) {
+				end = i;
 				break;
 			}
-			count++;
 		}
-		return new String(getData(), start, count);
+		return new String(getData(), start, end-start);
 	}
 	
-	public String getFileData() {
-		final int start = 4;
-		return new String(getData(), start, size()-start);
+	@Override
+	public String toString() {
+		assert getOpcode() == 3; // data
+		// 4 bytes header + 1 byte CRC8 = 5 bytes
+		return new String(getData(), 4, getLength()-6);
 	}
 	
-	public static DatagramPacket rrq(String filename, String mode, InetAddress addr, int port) throws IOException {
+	// FACTORY METHODS
+	
+	public static DatagramPacket make_rrq(String filename, String mode, InetAddress addr, int port) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		out.write((byte) 0); // opcode
@@ -75,10 +88,12 @@ public class TFTPPacket extends APacket {
 		out.write((byte) 0); // delimiter
 		
 		byte[] arr = out.toByteArray();
-		return new DatagramPacket(arr, arr.length, addr, port);
+		return new TFTPPacket(new DatagramPacket(
+				arr, arr.length, addr, port
+		)).getDatagramPacket();
 	}
 	
-	public static DatagramPacket wrq(String filename, String mode, InetAddress addr, int port) throws IOException {
+	public static DatagramPacket make_wrq(String filename, String mode, InetAddress addr, int port) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		out.write((byte) 0); // opcode
@@ -91,10 +106,12 @@ public class TFTPPacket extends APacket {
 		out.write((byte) 0); // delimiter
 		
 		byte[] arr = out.toByteArray();
-		return new DatagramPacket(arr, arr.length, addr, port);
+		return new TFTPPacket(new DatagramPacket(
+				arr, arr.length, addr, port
+		)).getDatagramPacket();
 	}
 	
-	public static DatagramPacket data(byte[] data, byte[] block, 
+	public static DatagramPacket make_data(byte[] data, byte[] block, 
 			InetAddress addr, int port) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
@@ -102,26 +119,30 @@ public class TFTPPacket extends APacket {
 		out.write((byte) 3); // opcode
 		
 		out.write(block); // block
-		
 		out.write(data); // data
 		
 		byte[] arr = out.toByteArray();
-		return new DatagramPacket(arr, arr.length, addr, port);
+		assert arr.length <= 516; // RFC 1350
+		return new TFTPPacket(new DatagramPacket(
+				arr, arr.length, addr, port
+		)).getDatagramPacket();
 	}
 	
-	public DatagramPacket ack() throws IOException {
+	public static DatagramPacket make_ack(TFTPPacket packet) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		out.write((byte) 0); // opcode
 		out.write((byte) 4); // opcode
 		
-		out.write(getBlock()); // block
+		out.write(packet.getBlock()); // block
 		
 		byte[] arr = out.toByteArray();
-		return new DatagramPacket(arr, arr.length, getAddress(), getPort());
+		return new TFTPPacket(new DatagramPacket(
+				arr, arr.length, packet.getAddress(), packet.getPort()
+		)).getDatagramPacket();
 	}
 	
-	public static DatagramPacket err(int err, String str, 
+	public static DatagramPacket make_err(int err, String str, 
 			InetAddress addr, int port) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
@@ -135,12 +156,9 @@ public class TFTPPacket extends APacket {
 		out.write((byte) 0); // delimiter
 		
 		byte[] arr = out.toByteArray();
-		return new DatagramPacket(arr, arr.length, addr, port);
-	} 
-	
-	public byte[] nextBlock() {
-		int current = Static.bytesToInt(getBlock());
-		return Static.intToBytes(current + 1);
+		return new TFTPPacket(new DatagramPacket(
+				arr, arr.length, addr, port
+		)).getDatagramPacket();
 	}
 	
 }
