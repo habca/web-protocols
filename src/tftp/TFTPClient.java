@@ -5,14 +5,16 @@ import java.net.*;
 
 import fi.jyu.mit.ohj2.Mjonot;
 import main.*;
+import packet.*;
 import thread.*;
 
 public class TFTPClient extends AThreadDatagramSocket implements IClient {
 	
 	public static final String PROTOCOL = "tftp";
 	
-	private DatagramPacket previous;
+	private TFTPPacket previous;
 	private FileReaderWriter manager;
+	private ThreadScheduled schedule;
 	
 	private InetAddress addr;
 	private int port;
@@ -20,53 +22,54 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 	public TFTPClient(int src_port, InetAddress dst_addr, int dst_port)
 			throws SocketException, UnknownHostException {
 		super(InetAddress.getByName("localhost"), src_port, TFTPPacket.MAX_SIZE);
+		
 		addr = dst_addr;
 		port = dst_port;
+		
+		// schedule runs a task at fixed rate
+		schedule = new ThreadScheduled(1, 2000);
+		
+		// start listening socket
 		new Thread(this).start();
 		
 		String format = "Client using UDP operates on %s:%d";
 		Main.onmessage(String.format(
-				format, InetAddress.getByName("localhost"), src_port));
+				format, InetAddress.getByName("localhost"), src_port)
+		);
 	}
-
-	@Override
-	public IThread onreceive() {
-		return new IThread() {
-
-			@Override
-			public void run() throws IOException {
-				TFTPPacket packet = new TFTPPacket(udpReceive());
-				
-				// RRQ or WRQ was accepted
-				if (packet.getOpcode() == 4) {
-					
-					// File manager for reading or writing a file
-					TFTPPacket prev = new TFTPPacket(previous);
-					// 512 bytes RFC - 1 byte CRC8 = 511 bytes
-					manager = new FileReaderWriter(prev.getFileName(), 511); // RFC 1350
-					
-					// RRQ was accepted
-					if (prev.getOpcode() == 1) {
-						setState(onrrq());
-					}
-					
-					// WRQ was accepted
-					if (prev.getOpcode() == 2) {
-						setState(onwrq());
-					}
-					
-				}
-				
-				// RRQ or WRQ was rejected
-				if (packet.getOpcode() == 5) {
-					// TODO: parsi virheteksti
-					Main.onmessage("error text here");
-				}
-			}
+	
+	private void onschedule(TFTPPacket packet) {
+		// include crc8 checksum to departing packets
+		APacketError error = APacketError.convertToCRC8(packet.getDatagramPacket());
+		
+		// schedule an event with a fixed interval
+		schedule.setTask(new Runnable() {
 			
-		};
+			@Override
+			public void run() {
+				// scheduled event
+				udpSend(error.getDatagramPacket());
+			}
+		
+		});
 	}
-
+	
+	@Override
+	public void onclose() throws IOException {
+		schedule.cancelTask();
+		schedule.close();
+		super.onclose();
+	}
+	
+	@Override
+	public void help() {
+		Main.onmessage(
+				"The following are the TFTP commands:\n" +
+				"RRQ <filename> octet\n" +
+				"WRQ <filename> octet"
+		);
+	}
+	
 	@Override
 	public void send(String str) throws IOException {
 		StringBuilder sb = new StringBuilder(str);
@@ -76,24 +79,50 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 		String filename = Mjonot.erota(sb);
 		String mode = Mjonot.erota(sb);
 		
-		// send UDP-packet for RRQ 
+		// send RRQ request 
 		if (command.equals("RRQ")) {
-			udpSend(previous = TFTPPacket.make_rrq(filename, mode, addr, port));
+			onschedule(previous = TFTPPacket.make_rrq(
+					filename, mode, addr, port
+			));
 		}
 		
-		// send UDP-packet for WRQ
+		// send WRQ request
 		if (command.equals("WRQ")) {
-			udpSend(previous = TFTPPacket.make_wrq(filename, mode, addr, port));
+			onschedule(previous = TFTPPacket.make_wrq(
+					filename, mode, addr, port
+			));
 		}
 	}
 
 	@Override
-	public void help() {
-		Main.onmessage(
-				"The following are the TFTP commands:\n" +
-				"RRQ <filename>\n" +
-				"WRQ <filename>"
-		);
+	public IThread onreceive() {
+		return new IThread() {
+
+			@Override
+			public void run() throws IOException {
+				APacketError response = new APacketError(udpReceive());
+				TFTPPacket packet = new TFTPPacket(response);
+				
+				// RRQ or WRQ was accepted
+				if (!response.isCorrupted() && packet.isACK(previous)) {
+					// File manager for reading or writing a file
+					manager = new FileReaderWriter(previous.getFileName(), TFTPPacket.MAX_DATA); // RFC 1350
+					
+					// RRQ was accepted
+					if (previous.isRRQ()) {
+						setState(onrrq());
+						return;
+					}
+					
+					// WRQ was accepted
+					if (previous.isWRQ()) {
+						setState(onwrq());
+						return;
+					}
+				}
+			}
+			
+		};
 	}
 	
 	private IThread onrrq() {
@@ -101,18 +130,23 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 
 			@Override
 			public void run() throws IOException {
-				TFTPPacket packet = new TFTPPacket(udpReceive());
+				APacketError response = new APacketError(udpReceive());
+				TFTPPacket packet = new TFTPPacket(response);
 				
-				// received UDP-packet for DATA
-				if (packet.getOpcode() == 3) {
+				System.out.println("Saatiin paketti");
+				
+				// DATA received, continue unless last packet
+				if (!response.isCorrupted() && packet.isDATA()) {
 					FileReaderWriter.write(manager.getName(), packet.toString());
-					udpSend(previous = TFTPPacket.make_ack(packet));
-				}
-				
-				// last packet was received, close connection
-				if (packet.getLength() < TFTPPacket.MAX_SIZE) {
-					Main.onmessage("RRQ completed");
-					setState(onreceive());
+					onschedule(previous = TFTPPacket.make_ack(packet));
+					
+					System.out.println("Saatiin virheetön");
+					
+					// last packet received, close connection
+					if (packet.getLength() < TFTPPacket.MAX_SIZE) {
+						Main.onmessage("RRQ completed");
+						close(); // close connection
+					}
 				}
 			}
 			
@@ -124,20 +158,31 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 
 			@Override
 			public void run() throws IOException {
-				
+				// last packet sent, close connection
 				if (!manager.hasNext()) {
-					setState(onreceive());
+					Main.onmessage("WRQ completed");
+					close();
 					return;
 				}
 				
-				TFTPPacket prev = new TFTPPacket(previous);
-				byte[] block = prev.nextBlock();
-				byte[] data = manager.next();
-				
-				udpSend(previous = TFTPPacket.make_data(data, block,
+				// Create next DATA packet to send
+				TFTPPacket curr = TFTPPacket.make_data(
+						manager.next(), previous.nextBlock(),
 						previous.getAddress(), previous.getPort()
-				));
-				TFTPPacket packet = new TFTPPacket(udpReceive());
+				);
+				
+				// Send next DATA packet
+				onschedule(previous = curr);
+				
+				while (true) {
+					APacketError response = new APacketError(udpReceive());
+					TFTPPacket packet = new TFTPPacket(response);
+					
+					// ACK received, continue to send
+					if (!response.isCorrupted() && packet.isACK(packet)) {
+						break; // continue to send
+					}
+				}
 			}
 			
 		};

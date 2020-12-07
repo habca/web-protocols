@@ -5,15 +5,46 @@ import java.io.*;
 import java.net.*;
 
 import main.*;
+import packet.APacketError;
 
 public class TFTPServer extends AThreadDatagramSocket {
 
-	private DatagramPacket previous;
+	private TFTPPacket previous;
 	private FileReaderWriter manager;
+	private ThreadScheduled schedule;
 	
 	public TFTPServer(int src_port) throws SocketException, UnknownHostException {
 		super(InetAddress.getByName("localhost"), src_port, TFTPPacket.MAX_SIZE);
+		
+		// schedule runs a task at fixed rate
+		schedule = new ThreadScheduled(1, 2000);
+		
+		// start listening socket
 		new Thread(this).start();
+	}
+	
+	private void onschedule(TFTPPacket packet) {
+		// include crc8 checksum to departing packets
+		APacketError error = APacketError.convertToCRC8(packet.getDatagramPacket());
+		
+		// schedule an event with a fixed interval
+		schedule.setTask(new Runnable() {
+			
+			@Override
+			public void run() {
+				// scheduled event
+				udpSend(error.getDatagramPacket());
+				System.out.println("Lähetettiin paketti");
+			}
+			
+		});
+	}
+	
+	@Override
+	public void onclose() throws IOException {
+		schedule.cancelTask();
+		schedule.close();
+		super.onclose();
 	}
 
 	@Override
@@ -22,22 +53,24 @@ public class TFTPServer extends AThreadDatagramSocket {
 
 			@Override
 			public void run() throws IOException {
-				TFTPPacket packet = new TFTPPacket(udpReceive());
+				APacketError response = new APacketError(udpReceive());
+				TFTPPacket packet = new TFTPPacket(response);
 				
-				// File manager for reading or writing a file
-				// 512 bytes RFC - 1 byte CRC8 = 511 bytes
-				manager = new FileReaderWriter(packet.getFileName(), 511); // RFF 1350
-				
-				// received UDP-packet for RRQ
-				if (packet.getOpcode() == 1) {
-					setState(onrrq());
-					udpSend(previous = TFTPPacket.make_ack(packet));
-				}
-				
-				// received UDP-packet for WRQ
-				if (packet.getOpcode() == 2) {
-					setState(onwrq());
-					udpSend(previous = TFTPPacket.make_ack(packet));
+				if (!response.isCorrupted()) {
+					// File manager for reading or writing a file
+					manager = new FileReaderWriter(packet.getFileName(), TFTPPacket.MAX_DATA); // RFF 1350
+					
+					// RRQ received
+					if (packet.isRRQ()) {
+						setState(onrrq());
+						onschedule(previous = TFTPPacket.make_ack(packet));
+					}
+					
+					// WRQ received
+					if (packet.isWRQ()) {
+						setState(onwrq());
+						onschedule(previous = TFTPPacket.make_ack(packet));
+					}
 				}
 			}
 			
@@ -49,20 +82,30 @@ public class TFTPServer extends AThreadDatagramSocket {
 
 			@Override
 			public void run() throws IOException {
-				
+				// last packet sent, close connection
 				if (!manager.hasNext()) {
-					setState(onreceive());
+					close(); // close connection
 					return;
 				}
 				
-				TFTPPacket prev = new TFTPPacket(previous);
-				byte[] block = prev.nextBlock();
-				byte[] data = manager.next();
-				
-				udpSend(previous = TFTPPacket.make_data(data, block,
+				// Create next DATA packet to send
+				TFTPPacket curr = TFTPPacket.make_data(
+						manager.next(), previous.nextBlock(),
 						previous.getAddress(), previous.getPort()
-				));
-				TFTPPacket packet = new TFTPPacket(udpReceive());
+				);
+				
+				// Send next DATA packet
+				onschedule(previous = curr);
+				
+				while (true) {
+					APacketError response = new APacketError(udpReceive());
+					TFTPPacket packet = new TFTPPacket(response);
+					
+					// ACK received, continue to send
+					if (!response.isCorrupted() && packet.isACK(curr)) {
+						return; // continue to send
+					}
+				}				
 			}
 			
 		};
@@ -73,17 +116,18 @@ public class TFTPServer extends AThreadDatagramSocket {
 
 			@Override
 			public void run() throws IOException {
-				TFTPPacket packet = new TFTPPacket(udpReceive());
+				APacketError response = new APacketError(udpReceive());
+				TFTPPacket packet = new TFTPPacket(response);
 				
-				// received UDP-packet for DATA
-				if (packet.getOpcode() == 3) {
+				// DATA received, continue unless last packet
+				if (!response.isCorrupted()) {
 					FileReaderWriter.write(manager.getName(), packet.toString());
-					udpSend(previous = TFTPPacket.make_ack(packet));
-				}
-				
-				// last packet was received, close connection
-				if (packet.getLength() < TFTPPacket.MAX_SIZE) {
-					setState(onreceive());
+					onschedule(previous = TFTPPacket.make_ack(packet));
+					
+					// last packet received, close connection
+					if (packet.getLength() < TFTPPacket.MAX_SIZE) {
+						close(); // close connection
+					}
 				}
 			}
 			

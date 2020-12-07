@@ -51,4 +51,11 @@ public abstract class AThread implements Runnable {
 		return close;
 	}
 	
+	public final void sleep(int milliseconds) {
+		try {
+			Thread.sleep((long) milliseconds);
+		} catch (InterruptedException e) {
+			Main.onerror(e);
+		}
+	}
 }

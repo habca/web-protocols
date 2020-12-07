@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.*;
 
 import main.*;
-import packet.DatagramSocketError;
+import packet.*;
 
 /**
  * Thread for receiving UDP-packets
@@ -17,13 +17,17 @@ import packet.DatagramSocketError;
  *
  */
 public abstract class AThreadDatagramSocket extends AThread {
-
+	
 	private DatagramSocketError socket;
 	private int size;
 	
 	public AThreadDatagramSocket(InetAddress src_addr, int src_port, int size) throws SocketException {
 		socket = new DatagramSocketError(src_port, src_addr);
 		this.size = size;
+	}
+	
+	public final void connect(InetAddress addr, int port) {
+		socket.connect(addr, port);
 	}
 	
 	public final void setErrorRates(double drop, double error, int delay) {
@@ -36,7 +40,7 @@ public abstract class AThreadDatagramSocket extends AThread {
 	}
 	
 	@Override
-	public final void onclose() throws IOException {
+	public void onclose() throws IOException {
 		socket.close();
 		Main.onmessage("DatagramSocket was closed");
 	}
@@ -45,14 +49,24 @@ public abstract class AThreadDatagramSocket extends AThread {
 	 * Kaikki lähtevät UDP-paketit kulkevat tätä kautta.
 	 * @param packet Lähtevä UDP-paketti
 	 */
-	public final void udpSend(DatagramPacket packet) {
+	public void udpSend(DatagramPacket packet) {
+		try {
+			socket.send(packet);
+		} catch (IOException e) {
+			Main.onerror(e);
+		}
+	}
+	
+	/*
+	public void udpSend(DatagramPacket packet) {
 		try {
 			Thread.sleep((long) 100); // sync delay
-			socket.send(packet); // save to previous packet
+			socket.send(packet);
 		} catch (IOException | InterruptedException e) {
 			Main.onerror(e);
 		}
 	}
+	*/
 	
 	/**
 	 * Kaikki saapuvat UDP-paketit kulkevat tätä kautta.

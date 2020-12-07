@@ -34,7 +34,6 @@ public class Main {
 			new User(System.in);
 		} catch (IOException e) {
 			Main.onerror(e);
-			e.printStackTrace();
 		}
 	}
 
@@ -48,6 +47,7 @@ public class Main {
 	
 	public static void onerror(Exception e) {
 		System.err.println(e.getMessage());
+		e.printStackTrace();
 	}
 	
 	public static void onquit() {

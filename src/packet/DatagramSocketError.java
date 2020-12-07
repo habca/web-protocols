@@ -47,7 +47,7 @@ public class DatagramSocketError extends DatagramSocket {
 
 			// pudotetaan satunnainen paketti
 			if (rand.nextDouble() < droprate) {
-				Main.onerror(new Exception("Dropped packet"));
+				Main.onmessage("Dropped packet");
 				continue;
 			}
 

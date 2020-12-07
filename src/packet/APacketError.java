@@ -12,12 +12,12 @@ import org.junit.*;
  * @author Harri Linna
  * @version 5.12.2020
  */
-public abstract class APacketError extends APacket {
+public class APacketError extends APacket {
 
 	private static final int[] mask = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 	
 	public APacketError(DatagramPacket packet) {
-		super(convertToCRC8(packet));
+		super(packet);
 	}
 	
 	// PUBLIC METHODS
@@ -31,13 +31,16 @@ public abstract class APacketError extends APacket {
 		return new String(getData(), 0, getLength() - 1); // remove CRC8
 	}
 	
+	public DatagramPacket removeCRC8() {
+		byte[] arr = Arrays.copyOfRange(getData(), 0, getLength()-1);
+		return new DatagramPacket(arr, arr.length, getAddress(), getPort());
+	}
+	
 	// PRIVATE METHODS
 	
-	private static DatagramPacket convertToCRC8(DatagramPacket packet) {
-		byte[] data = Arrays.copyOf(packet.getData(), packet.getLength());
-		data = encode(data); // add CRC8
-		return new DatagramPacket(data, data.length,
-				packet.getAddress(), packet.getPort());
+	public static APacketError convertToCRC8(DatagramPacket packet) {
+		byte[] data = encode(packet.getData()); // add CRC8
+		return new APacketError(new DatagramPacket(data, data.length, packet.getAddress(), packet.getPort()));
 	}
 	
 	private static byte[] encode(byte[] arr) {
@@ -97,47 +100,52 @@ public abstract class APacketError extends APacket {
 		
 		// tarvitaan vain testeihin siksi private
 		private static boolean corrupt(byte[] data) {
-			return checksum(data) != 0; 
+			return checksum(data) != 0;
 		}
 		
 		@Test
 		public void testChecksum() {
-			String error = "Tarkistussumma väärin: ";
-			
 			byte input = 97;
 			byte[] test = { input };
 			byte output = checksum(test);
 
-			assertEquals(error, 97, input); // 01100001 bin, 97 dec
-			assertEquals(error, 32, output); // 00100000 bin, 32 dec
+			assertEquals(97, input); // 01100001 bin, 97 dec
+			assertEquals(32, output); // 00100000 bin, 32 dec
 		}
 		
 		@Test
 		public void testIsCorrupted() {
-			String error = "Oikeellisuustarkistus väärin: ";
-			
 			byte input = 97;
+			
 			byte[] test = { input };
-			byte output = checksum(test);
-
-			byte[] test2 = { input, output };
-			boolean result = !corrupt(test2);
-
+			byte[] test2 = { input, checksum(test) };
 			byte[] test3 = { input, 33 }; // 00100001 bin, dec 33
-			boolean result2 = corrupt(test3);
-
-			assertTrue(error, result); // true
-			assertTrue(error, result2); // true
-
-			byte seq = 5;
-			byte[] test4 = { seq, input };
-			byte output2 = checksum(test4);
-
-			byte[] test5 = { seq, input, output2 };
-			boolean result3 = !corrupt(test5);
-
-			assertTrue(error, result3); // true
-		}	
+			
+			assertFalse(corrupt(test2));
+			assertTrue(corrupt(test3));
+			
+			byte[] test4 = { 5, input };
+			byte[] test5 = { 5, input, checksum(test4) };
+			
+			assertFalse(corrupt(test5));
+		}
+		
+		@Test
+		public void testRemoveCRC8() {
+			byte[] arr = "testdata".getBytes();
+			
+			DatagramPacket packet = new DatagramPacket(arr, arr.length, null, 0);
+			APacketError error = APacketError.convertToCRC8(packet);
+			DatagramPacket expect = error.removeCRC8();
+			
+			assertFalse(error.isCorrupted());
+			
+			assertEquals(packet.getLength() + 1, error.getLength());
+			assertFalse(Arrays.equals(packet.getData(), error.getData()));
+			
+			assertTrue(Arrays.equals(packet.getData(), expect.getData()));
+			assertEquals(packet.getLength(), expect.getLength());
+		}
 	}
 	
 }

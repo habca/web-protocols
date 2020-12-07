@@ -58,22 +58,41 @@ public final class Static {
 	}
 	
 	public static int bytesToInt(byte[] arr) {
-		return 0; // TODO: ???
+		int a = arr[0] & 0xFF;
+		int b = arr[1] & 0xFF;
+		return FTPClient.calcPort(a, b);
 	}
 	
-	public static byte[] intToBytes(int num) {
-		return new byte[2]; // TODO: ???
+	public static byte[] intToBytes(int num, int size) {
+		// TODO: taulukon ekat tavut aina 0, korjaa
+		byte[] arr = new byte[size];
+		arr[arr.length-1] = (byte) num;
+		return arr;
 	}
 	
 	public static class TestStatic {
+		
 		@Test
-		public void testByteToInt() {
+		public void testBytesToInt() {
 			String error = "Kokonaisluku muunnetaan väärin:";
-			byte[] arr1 = new byte[] {(byte) 0, (byte) 1};
-			byte[] arr2 = new byte[] {(byte) 155, (byte) 200};
+			
+			byte[] arr1 = new byte[] {0, 1};
+			byte[] arr2 = new byte[] {4, 5};
+			
 			assertEquals(error, 1, bytesToInt(arr1));
-			assertEquals(error, FTPClient.calcPort(155,200), bytesToInt(arr2));
+			assertEquals(error, FTPClient.calcPort(4,5), bytesToInt(arr2));
 		}
+		
+		@Test
+		public void testIntToBytes() {
+			String error = "Tavut muunnetaan väärin:";
+			
+			int in = FTPClient.calcPort(0, 5);
+			byte[] out = new byte[] {(byte) 0, (byte) 5};
+			
+			assertTrue(error, Arrays.equals(intToBytes(in, 2), out));
+		}
+		
 	}
 	
 }

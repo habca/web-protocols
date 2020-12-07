@@ -98,7 +98,9 @@ public class FTPClient extends AThreadSocket implements IClient {
 		return sb.toString();
     }
     
-    public static class FTPClientTest {
+    // JUNIT TESTS
+    
+    public static class TestFTPClient {
     	private static final  String PASV = 
     			"227 Entering Passive Mode (193,166,3,2,155,200)";
     	@Test
