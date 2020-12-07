@@ -228,6 +228,7 @@ public class TFTPPacket extends APacket {
 			assertTrue(ack2.getBlock() == rrq.getBlock() + 1);
 			assertFalse(ack2.isACK(rrq));
 		}
+		
 		@Test
 		public void testMake_rrq() throws IOException {
 			String filename = "/home/user/file";
