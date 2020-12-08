@@ -69,7 +69,6 @@ public abstract class AThreadDatagramSocket extends AThread {
 	public void udpSend(DatagramPacket packet) {
 		synchronized (lock) {
 			try {
-				Static.sleep(100);
 				if (!socket.isClosed()) {
 					socket.send(packet);
 				}
