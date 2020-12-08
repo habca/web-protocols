@@ -17,7 +17,7 @@ public class ThreadScheduled {
 
 	public final void setTask(Runnable runnable) {
 		cancelTask(); // max one task
-		task = pool.scheduleAtFixedRate(runnable, 0, delay_rate, TimeUnit.MILLISECONDS);
+		task = pool.scheduleAtFixedRate(runnable, delay_rate, delay_rate, TimeUnit.MILLISECONDS);
 	}
 
 	public final void cancelTask() {

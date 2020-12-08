@@ -7,41 +7,53 @@ import java.net.*;
 import main.*;
 import packet.*;
 
+/**
+ * Huom! Älä erehdy käyttämään DatagramSocket.connect() metodia.
+ * Aiheuttaa vain harmia ja UDP muutenkin yhteydetön protokolla.
+ * @author Harri Linna
+ * @version 9.12.2020
+ */
 public class TFTPServerReceiver extends AThreadDatagramSocket {
 
 	private TFTPPacket previous;
 	private FileReaderWriter manager;
 	private ThreadScheduled schedule;
 	
-	public TFTPServerReceiver(int src_port) throws SocketException, UnknownHostException {
-		super(InetAddress.getByName("localhost"), src_port, TFTPPacket.MAX_SIZE);
-		
-		// schedule runs a task at fixed rate
-		schedule = new ThreadScheduled(1, 2000);
-		
-		// start listening socket
-		new Thread(this).start();
-	}
+	private DatagramPacket request;
 	
-	public TFTPServerReceiver(DatagramSocketError socket) {
+	public TFTPServerReceiver(DatagramSocketError socket, DatagramPacket packet) {
 		super(socket, TFTPPacket.MAX_SIZE);
 		
-		// schedule runs a task at fixed rate
+		// schedule runs tasks at fixed rate
 		schedule = new ThreadScheduled(1, 2000);
+		request = packet;
 		
-		// start listening socket
+		// start the thread
 		new Thread(this).start();
 	}
 	
-	private synchronized void onschedule(TFTPPacket packet) {
-		// include CRC8 checksum to all the departing packets
-		APacketError error = APacketError.convertToCRC8(packet.getDatagramPacket());
+	/* 
+	public TFTPServerReceiver(int src_port, DatagramPacket packet) throws SocketException, UnknownHostException {
+		super(InetAddress.getByName("localhost"), src_port, TFTPPacket.MAX_SIZE);
 		
-		// schedule an event with a fixed interval
+		// schedule runs tasks at fixed rate
+		schedule = new ThreadScheduled(1, 2000);
+		request = packet;
+		
+		// start the thread
+		new Thread(this).start();
+	}
+	*/
+	
+	private void onschedule(TFTPPacket packet) {
+		// include CRC8 checksum to all departing packets
+		APacketError error = APacketError.convertToCRC8(packet.getDatagramPacket());
+		udpSend(error.getDatagramPacket());
+		
 		schedule.setTask(new Runnable() {
 			
 			@Override
-			public synchronized void run() {
+			public void run() {
 				udpSend(error.getDatagramPacket());
 			}
 			
@@ -49,7 +61,7 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 	}
 	
 	@Override
-	public synchronized void onclose() throws IOException {
+	public void onclose() throws IOException {
 		schedule.cancelTask();
 		schedule.close();
 		super.onclose();
@@ -61,26 +73,27 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 
 			@Override
 			public void run() throws IOException {
-				APacketError response = new APacketError(udpReceive());
+				//APacketError response = new APacketError(udpReceive());
+				APacketError response = new APacketError(request);
 				TFTPPacket packet = new TFTPPacket(response);
 				
 				if (!response.isCorrupted()) {
-					// File manager for reading or writing a file
+					// read from or write to a file
 					manager = new FileReaderWriter(
 							packet.getFileName(), TFTPPacket.MAX_DATA
 					);
 					
-					// RRQ received
+					// received RRQ
 					if (packet.isRRQ()) {
 						setState(onrrq());
 					}
 					
-					// WRQ received
+					// received WRQ
 					if (packet.isWRQ()) {
 						setState(onwrq());
 					}
 					
-					// Send ACK packet
+					// send ACK
 					onschedule(previous = TFTPPacket.make_ack(packet));
 				}
 			}
@@ -96,27 +109,25 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 				APacketError response = new APacketError(udpReceive());
 				TFTPPacket packet = new TFTPPacket(response);
 				
-				// ACK received, continue to send
+				// received ACK
 				if (!response.isCorrupted() && packet.isACK(previous)) {
 					
-					// last packet sent, close connection
+					// sent last DATA
 					if (!manager.hasNext()) {
-						schedule.cancelTask();
-						setState(onreceive());
-						//close(); // close connection
+						//schedule.cancelTask();
+						//setState(onreceive());
+						close();
 					}
 					
-					// not last packet, continue to send
+					// send DATA
 					if (manager.hasNext()) {
-						// Create next DATA packet to send
-						TFTPPacket data = TFTPPacket.make_data(
-								manager.next(), packet.nextBlock(),
+						InetSocketAddress addr = new InetSocketAddress(
 								packet.getAddress(), packet.getPort()
 						);
-						// Send next DATA packet
-						onschedule(previous = data);
+						onschedule(previous = TFTPPacket.make_data(
+								manager.next(), packet.nextBlock(), addr
+						));
 					}
-					
 				}
 			}
 			
@@ -131,14 +142,16 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 				APacketError response = new APacketError(udpReceive());
 				TFTPPacket packet = new TFTPPacket(response);
 				
-				// DATA received, continue unless last packet
-				if (!response.isCorrupted()) {
+				// received DATA
+				if (!response.isCorrupted() && packet.isDATA(previous)) {
 					FileReaderWriter.write(manager.getName(), packet.toString());
 					onschedule(previous = TFTPPacket.make_ack(packet));
 					
-					// last packet received, close connection
-					if (packet.getLength() < TFTPPacket.MAX_SIZE) {
-						close(); // close connection
+					// received last DATA
+					if (response.getLength() < TFTPPacket.MAX_SIZE) {
+						//schedule.cancelTask();
+						//setState(onreceive());
+						close();
 					}
 				}
 			}

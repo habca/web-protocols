@@ -37,19 +37,16 @@ public abstract class AThreadDatagramSocket extends AThread {
 	
 	// PUBLIC METHODS
 	
+	public final void setSoTimeout(int milliseconds) throws SocketException {
+		socket.setSoTimeout(milliseconds);
+	}
+	
 	public final InetAddress getAddress() {
 		return socket.getInetAddress();
 	}
 	
 	public final int getPort() {
 		return socket.getPort();
-	}
-	
-	public final void connect(InetAddress addr, int port) {
-		if (socket.isConnected()) {
-			socket.disconnect();
-		}
-		socket.connect(addr, port);
 	}
 	
 	@Override
@@ -94,7 +91,9 @@ public abstract class AThreadDatagramSocket extends AThread {
 	 */
 	public DatagramPacket udpReceive() throws IOException {
 		DatagramPacket packet = new DatagramPacket(new byte[size], size);
-		socket.receive(packet);
+		if (!socket.isClosed()) {
+			socket.receive(packet);
+		}
 		return packet;
 	}
 	

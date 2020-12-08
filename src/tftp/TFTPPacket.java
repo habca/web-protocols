@@ -103,7 +103,7 @@ public class TFTPPacket extends APacket {
 	
 	// FACTORY METHODS
 	
-	public static TFTPPacket make_rrq(String filename, String mode, InetAddress addr, int port) throws IOException {
+	public static TFTPPacket make_rrq(String filename, String mode, InetSocketAddress addr) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		out.write((byte) 0); // opcode
@@ -117,11 +117,11 @@ public class TFTPPacket extends APacket {
 		
 		byte[] arr = out.toByteArray();
 		return new TFTPPacket(new DatagramPacket(
-				arr, arr.length, addr, port
+				arr, arr.length, addr
 		));
 	}
 	
-	public static TFTPPacket make_wrq(String filename, String mode, InetAddress addr, int port) throws IOException {
+	public static TFTPPacket make_wrq(String filename, String mode, InetSocketAddress addr) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		out.write((byte) 0); // opcode
@@ -135,12 +135,11 @@ public class TFTPPacket extends APacket {
 		
 		byte[] arr = out.toByteArray();
 		return new TFTPPacket(new DatagramPacket(
-				arr, arr.length, addr, port
+				arr, arr.length, addr
 		));
 	}
 	
-	public static TFTPPacket make_data(byte[] data, int block, 
-			InetAddress addr, int port) throws IOException {
+	public static TFTPPacket make_data(byte[] data, int block, InetSocketAddress addr) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		out.write((byte) 0); // opcode
@@ -152,7 +151,7 @@ public class TFTPPacket extends APacket {
 		byte[] arr = out.toByteArray();
 		assert arr.length <= MAX_SIZE; // RFC 1350
 		return new TFTPPacket(new DatagramPacket(
-				arr, arr.length, addr, port
+				arr, arr.length, addr
 		));
 	}
 	
@@ -170,7 +169,7 @@ public class TFTPPacket extends APacket {
 		));
 	}
 	
-	public static TFTPPacket make_err(int err, InetAddress addr, int port) throws IOException {
+	public static TFTPPacket make_err(int err, InetSocketAddress addr) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
 		out.write((byte) 0); // opcode
@@ -184,7 +183,7 @@ public class TFTPPacket extends APacket {
 		
 		byte[] arr = out.toByteArray();
 		return new TFTPPacket(new DatagramPacket(
-				arr, arr.length, addr, port
+				arr, arr.length, addr
 		));
 	}
 	
@@ -194,7 +193,9 @@ public class TFTPPacket extends APacket {
 		
 		@Test
 		public void testTFTPPacket() throws IOException {
-			TFTPPacket send1 = make_data("testdata".getBytes(), 1, null, 0);
+			InetSocketAddress none = new InetSocketAddress(0);
+			
+			TFTPPacket send1 = make_data("testdata".getBytes(), 1, none);
 			APacketError send2 = APacketError.convertToCRC8(send1.getDatagramPacket());
 			APacketError receive2 = new APacketError(send2.getDatagramPacket());
 			TFTPPacket receive1 = new TFTPPacket(receive2.removeCRC8());
@@ -214,10 +215,12 @@ public class TFTPPacket extends APacket {
 		
 		@Test
 		public void testNextBlock() throws IOException {
-			TFTPPacket rrq = make_rrq("filename", "octet", null, 0);
+			InetSocketAddress none = new InetSocketAddress(0);
+			
+			TFTPPacket rrq = make_rrq("filename", "octet", none);
 			TFTPPacket ack1 = make_ack(rrq);
 			
-			TFTPPacket data = make_data("testdata".getBytes(), rrq.nextBlock(), null, 0);
+			TFTPPacket data = make_data("testdata".getBytes(), rrq.nextBlock(), none);
 			TFTPPacket ack2 = make_ack(data);
 			
 			assertTrue(ack1.getBlock() == rrq.getBlock());
@@ -238,7 +241,8 @@ public class TFTPPacket extends APacket {
 			String filename = "/home/user/file";
 			String mode = "octet";
 			
-			TFTPPacket rrq = make_rrq(filename, mode, null, 0);
+			InetSocketAddress none = new InetSocketAddress(0);
+			TFTPPacket rrq = make_rrq(filename, mode, none);
 				
 			assertTrue(rrq.getOpcode() == 1);
 			assertTrue(rrq.isRRQ());
@@ -248,10 +252,12 @@ public class TFTPPacket extends APacket {
 		
 		@Test
 		public void testMake_wrq() throws IOException {
+			InetSocketAddress none = new InetSocketAddress(0);
+			
 			String filename = "/home/user/file";
 			String mode = "octet";
 			
-			TFTPPacket wrq = make_wrq(filename, mode, null, 0);
+			TFTPPacket wrq = make_wrq(filename, mode, none);
 				
 			assertTrue(wrq.getOpcode() == 2);
 			assertTrue(wrq.isWRQ());
@@ -261,8 +267,10 @@ public class TFTPPacket extends APacket {
 		
 		@Test
 		public void testMake_data() throws IOException {
+			InetSocketAddress none = new InetSocketAddress(0);
+			
 			for (int i = 0; i < ERROR.length; i++) {
-				TFTPPacket data = make_data(ERROR[i].getBytes(), i, null, 0);
+				TFTPPacket data = make_data(ERROR[i].getBytes(), i, none);
 				
 				assertTrue(data.getOpcode() == 3);
 				assertTrue(data.isDATA());
@@ -277,7 +285,7 @@ public class TFTPPacket extends APacket {
 				assertTrue(Arrays.equals(ERROR[i].getBytes(), suffix));
 			}
 			
-			TFTPPacket test1 = make_data(new byte[MAX_DATA], 0, null, 0);
+			TFTPPacket test1 = make_data(new byte[MAX_DATA], 0, none);
 			APacketError test2 = APacketError.convertToCRC8(test1.getDatagramPacket());
 			TFTPPacket test3 = new TFTPPacket(test2.removeCRC8());
 			TFTPPacket test4 = new TFTPPacket(test2);
@@ -293,11 +301,13 @@ public class TFTPPacket extends APacket {
 				
 		@Test
 		public void testMake_ack() throws IOException {
+			InetSocketAddress none = new InetSocketAddress(0);
+			
 			List<TFTPPacket> test = new ArrayList<TFTPPacket>();
-			test.add(make_rrq("filename", "octet", null, 0));
-			test.add(make_wrq("filename", "octet", null, 0));
-			test.add(make_data(new byte[0], 1, null, 0));
-			test.add(make_data(new byte[0], test.get(test.size()-1).nextBlock(), null, 0));
+			test.add(make_rrq("filename", "octet", none));
+			test.add(make_wrq("filename", "octet", none));
+			test.add(make_data(new byte[0], 1, none));
+			test.add(make_data(new byte[0], test.get(test.size()-1).nextBlock(), none));
 			
 			for (TFTPPacket rec : test) {
 				TFTPPacket ack = make_ack(rec);
@@ -322,9 +332,11 @@ public class TFTPPacket extends APacket {
 		}
 		
 		@Test
-		public void testMake_err() throws IOException {	
+		public void testMake_err() throws IOException {
+			InetSocketAddress none = new InetSocketAddress(0);
+			
 			for (int i = 0; i < ERROR.length; i++) {
-				TFTPPacket packet = make_err(i, null, 0);
+				TFTPPacket packet = make_err(i, none);
 				
 				assertEquals(packet.getData().length, packet.getLength());
 				assertEquals(5 + ERROR[i].length(), packet.getLength());

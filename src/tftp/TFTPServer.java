@@ -6,6 +6,12 @@ import java.net.*;
 import packet.*;
 import thread.*;
 
+/**
+ * Huom! Älä erehdy käyttämään DatagramSocket.connect() metodia.
+ * Aiheuttaa vain harmia ja UDP muutenkin yhteydetön protokolla.
+ * @author Harri Linna
+ * @version 9.12.2020
+ */
 public class TFTPServer extends AThreadDatagramSocket {
 	
 	public TFTPServer(int src_port) throws SocketException, UnknownHostException {
@@ -19,13 +25,13 @@ public class TFTPServer extends AThreadDatagramSocket {
 
 			@Override
 			public void run() throws IOException {
-				TFTPPacket packet = new TFTPPacket(udpReceive());
+				DatagramPacket packet = udpReceive();
 				
 				// create socket to next available port
-				DatagramSocketError socket = new DatagramSocketError(8070, getAddress());
+				InetSocketAddress addr = new InetSocketAddress(8070); // 8069+1
+				DatagramSocketError socket = new DatagramSocketError(addr);
 				//socket.setErrorRates(0.2, 0.2, 1); // generate errors
-				//socket.connect(packet.getAddress(), packet.getPort());
-				new TFTPServerReceiver(socket);
+				new TFTPServerReceiver(socket, packet);
 			}
 			
 		};

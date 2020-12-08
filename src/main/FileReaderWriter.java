@@ -22,11 +22,14 @@ public class FileReaderWriter extends File implements Iterator<byte[]> {
 		
 		// read file into a byte array
 		data = new byte[(int) this.length()];
-		try (InputStream is = new FileInputStream(this)) {
-			is.read(data);
-		} catch (IOException e) {
-	    	Main.onerror(e);
-	    }
+		
+		if (isFile()) {
+			try (InputStream is = new FileInputStream(this)) {
+				is.read(data);
+			} catch (IOException e) {
+		    	Main.onerror(e);
+		    }
+		}
 	}
 	
 	/*
@@ -42,7 +45,8 @@ public class FileReaderWriter extends File implements Iterator<byte[]> {
 	*/
 	
 	public static void write(String filename, String data) {
-		try (PrintStream fo = new PrintStream(new FileOutputStream(new File(filename), true))) { 
+		try (PrintStream fo = new PrintStream(
+				new FileOutputStream(new File(filename), true))) { 
 			fo.print(data);
 		} catch (FileNotFoundException e) {
 			Main.onerror(e);

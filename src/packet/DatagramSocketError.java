@@ -13,7 +13,6 @@ import main.*;
 /**
  * Soketti gerenoi satunnasia virheitä. 
  * Oletuksena virheetön tiedonsiirto.
- * 
  * @author Harri Linna
  * @version 4.12.2020
  */
@@ -23,8 +22,14 @@ public class DatagramSocketError extends DatagramSocket {
 	private double biterror = 0.0;
 	private int delayms = 0; // ms unit
 
+	// CONSTRUCTORS
+	
 	public DatagramSocketError(int port, InetAddress addr) throws SocketException {
 		super(port, addr);
+	}
+	
+	public DatagramSocketError(InetSocketAddress addr) throws SocketException {
+		super(addr);
 	}
 	
 	// PUBLIC METHODS
