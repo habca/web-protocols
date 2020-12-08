@@ -89,6 +89,10 @@ public class TFTPPacket extends APacket {
 		return getOpcode() == 3;
 	}
 	
+	public boolean isDATA(TFTPPacket packet) {
+		return getOpcode() == 3 && getBlock() == packet.nextBlock();
+	}
+	
 	public boolean isACK(TFTPPacket packet) {
 		return getOpcode() == 4 && getBlock() == packet.getBlock();
 	}

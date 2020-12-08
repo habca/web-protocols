@@ -42,13 +42,11 @@ public class DatagramSocketError extends DatagramSocket {
 		while (true) {
 			super.receive(packet);
 
-			try {
-				// vastaanoton satunnainen viive
-				Thread.sleep((long) intRange(0, delayms));
-			} catch (InterruptedException e) {
-				Main.onerror(e);
+			// vastaanoton satunnainen viive
+			if (delayms > 0) {
+				Static.sleep(intRange(0, delayms));
 			}
-
+			
 			// pudotetaan satunnainen paketti
 			if (rand.nextDouble() < droprate) {
 				Main.onmessage("Dropped packet");
@@ -57,10 +55,8 @@ public class DatagramSocketError extends DatagramSocket {
 
 			// asetetaan satunnainen bittivirhe
 			if (rand.nextDouble() < biterror) {
-				byte[] data = packet.getData();
-				int errbyte = intRange(0, packet.getLength() - 1); // CRC8
-				int errbit = intRange(0, 7); // byte
-				data[errbyte] = generateError(data[errbyte], errbit);
+				Main.onmessage("Bit error");
+				generateError(packet);
 			}
 
 			return;
@@ -85,7 +81,8 @@ public class DatagramSocketError extends DatagramSocket {
 	// PRIVATE METHODS
 	
 	private static int intRange(int min, int max) {
-		return new Random().nextInt(Math.abs(max - min)) + Math.min(min,max);
+		Random rand = new Random();
+		return rand.nextInt(Math.abs(max - min)) + Math.min(min,max);
 	}
 
 	private static byte generateError(byte errbyte, int errbit) {

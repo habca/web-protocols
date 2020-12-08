@@ -39,7 +39,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 	}
 	
 	private void onschedule(TFTPPacket packet) {
-		// include crc8 checksum to departing packets
+		// include CRC8 checksum to all the departing packets
 		APacketError error = APacketError.convertToCRC8(packet.getDatagramPacket());
 		
 		// schedule an event with a fixed interval
@@ -47,7 +47,6 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 			
 			@Override
 			public void run() {
-				// scheduled event
 				udpSend(error.getDatagramPacket());
 			}
 		
@@ -103,6 +102,9 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 				APacketError response = new APacketError(udpReceive());
 				TFTPPacket packet = new TFTPPacket(response);
 				
+				addr = packet.getAddress();
+				port = packet.getPort();
+				
 				// RRQ or WRQ was accepted
 				if (!response.isCorrupted() && packet.isACK(previous)) {
 					// File manager for reading or writing a file
@@ -133,19 +135,15 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 				APacketError response = new APacketError(udpReceive());
 				TFTPPacket packet = new TFTPPacket(response);
 				
-				System.out.println("Saatiin paketti");
-				
 				// DATA received, continue unless last packet
-				if (!response.isCorrupted() && packet.isDATA()) {
+				if (!response.isCorrupted() && packet.isDATA(previous)) {
 					FileReaderWriter.write(manager.getName(), packet.toString());
 					onschedule(previous = TFTPPacket.make_ack(packet));
 					
-					System.out.println("Saatiin virheetön");
-					
 					// last packet received, close connection
-					if (packet.getLength() < TFTPPacket.MAX_SIZE) {
-						Main.onmessage("RRQ completed");
+					if (response.getLength() < TFTPPacket.MAX_SIZE) {
 						close(); // close connection
+						Main.onmessage("RRQ completed");
 					}
 				}
 			}

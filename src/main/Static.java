@@ -70,6 +70,14 @@ public final class Static {
 		return arr;
 	}
 	
+	public static final void sleep(int milliseconds) {
+		try {
+			Thread.sleep((long) milliseconds);
+		} catch (InterruptedException e) {
+			Main.onerror(e);
+		}
+	}
+	
 	public static class TestStatic {
 		
 		@Test

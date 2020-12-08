@@ -4,7 +4,7 @@ import java.util.concurrent.*;
 
 public class ThreadScheduled {
 		
-	private ScheduledExecutorService pool;
+	private ScheduledThreadPoolExecutor pool;
 	private ScheduledFuture<?> task;
 	
 	private long delay_rate; // ms unit
@@ -12,6 +12,7 @@ public class ThreadScheduled {
 	public ThreadScheduled(int pool_size, long delay_rate) {
 		this.delay_rate = delay_rate;
 		pool = new ScheduledThreadPoolExecutor(pool_size);
+		pool.setRemoveOnCancelPolicy(true); // remove task on cancel
 	}
 
 	public final void setTask(Runnable runnable) {

@@ -18,20 +18,16 @@ import packet.*;
  */
 public abstract class AThreadDatagramSocket extends AThread {
 	
-	private DatagramSocketError socket;
+	private static final Object lock = new Object();
+	
+	private DatagramSocket socket;
 	private int size;
+	
+	// CONSTRUCTORS
 	
 	public AThreadDatagramSocket(InetAddress src_addr, int src_port, int size) throws SocketException {
 		socket = new DatagramSocketError(src_port, src_addr);
 		this.size = size;
-	}
-	
-	public final void connect(InetAddress addr, int port) {
-		socket.connect(addr, port);
-	}
-	
-	public final void setErrorRates(double drop, double error, int delay) {
-		socket.setErrorRates(drop, error, delay);
 	}
 	
 	public AThreadDatagramSocket(DatagramSocketError socket, int size) {
@@ -39,10 +35,31 @@ public abstract class AThreadDatagramSocket extends AThread {
 		this.size = size;
 	}
 	
+	// PUBLIC METHODS
+	
+	public final InetAddress getAddress() {
+		return socket.getInetAddress();
+	}
+	
+	public final int getPort() {
+		return socket.getPort();
+	}
+	
+	/*
+	public final void connect(InetAddress addr, int port) {
+		if (socket.isConnected()) {
+			socket.disconnect();
+		}
+		socket.connect(addr, port);
+	}
+	*/
+	
 	@Override
 	public void onclose() throws IOException {
-		socket.close();
-		Main.onmessage("DatagramSocket was closed");
+		synchronized (lock) {
+			socket.close();
+			Main.onmessage("DatagramSocket was closed");
+		}
 	}
 	
 	/**
@@ -50,10 +67,15 @@ public abstract class AThreadDatagramSocket extends AThread {
 	 * @param packet Lähtevä UDP-paketti
 	 */
 	public void udpSend(DatagramPacket packet) {
-		try {
-			socket.send(packet);
-		} catch (IOException e) {
-			Main.onerror(e);
+		synchronized (lock) {
+			try {
+				Static.sleep(100);
+				if (!socket.isClosed()) {
+					socket.send(packet);
+				}
+			} catch (IOException e) {
+				Main.onerror(e);
+			}
 		}
 	}
 	

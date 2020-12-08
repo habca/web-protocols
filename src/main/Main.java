@@ -47,7 +47,6 @@ public class Main {
 	
 	public static void onerror(Exception e) {
 		System.err.println(e.getMessage());
-		e.printStackTrace();
 	}
 	
 	public static void onquit() {

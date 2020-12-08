@@ -102,11 +102,8 @@ public class User extends AThread {
 		}
 		
 		if (protocol.equals(TFTPClient.PROTOCOL)) {
-			int src_port = 8070; // 8069+1
 			client.close();
-			TFTPClient tmp = new TFTPClient(src_port, addr, port);
-			tmp.setErrorRates(0.1, 0.5, 1); // generate errors
-			client = tmp;
+			client = new TFTPClient(8071, addr, port); // 8069+2
 			return true;
 		}
 		
