@@ -80,6 +80,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 		
 		// send RRQ request 
 		if (command.equals("RRQ")) {
+			setState(onrrq());
 			onschedule(previous = TFTPPacket.make_rrq(
 					filename, mode, addr, port
 			));
@@ -87,6 +88,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 		
 		// send WRQ request
 		if (command.equals("WRQ")) {
+			setState(onwrq());
 			onschedule(previous = TFTPPacket.make_wrq(
 					filename, mode, addr, port
 			));
@@ -108,8 +110,14 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 				// RRQ or WRQ was accepted
 				if (!response.isCorrupted() && packet.isACK(previous)) {
 					// File manager for reading or writing a file
-					manager = new FileReaderWriter(previous.getFileName(), TFTPPacket.MAX_DATA); // RFC 1350
+					manager = new FileReaderWriter(
+							previous.getFileName(), TFTPPacket.MAX_DATA
+					);
 					
+					// Send ACK packet
+					onschedule(previous = TFTPPacket.make_ack(packet));
+					
+					/*
 					// RRQ was accepted
 					if (previous.isRRQ()) {
 						setState(onrrq());
@@ -121,6 +129,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 						setState(onwrq());
 						return;
 					}
+					*/
 				}
 			}
 			
@@ -142,8 +151,8 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 					
 					// last packet received, close connection
 					if (response.getLength() < TFTPPacket.MAX_SIZE) {
-						close(); // close connection
 						Main.onmessage("RRQ completed");
+						close(); // close connection
 					}
 				}
 			}

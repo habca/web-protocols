@@ -25,7 +25,7 @@ public class TFTPServer extends AThreadDatagramSocket {
 				DatagramSocketError socket = new DatagramSocketError(8070, getAddress());
 				//socket.setErrorRates(0.2, 0.2, 1); // generate errors
 				//socket.connect(packet.getAddress(), packet.getPort());
-				new TFTPServerReceiver(socket, packet, TFTPPacket.MAX_SIZE);
+				new TFTPServerReceiver(socket);
 			}
 			
 		};

@@ -18,7 +18,7 @@ import packet.*;
  */
 public abstract class AThreadDatagramSocket extends AThread {
 	
-	private static final Object lock = new Object();
+	private final Object lock = new Object();
 	
 	private DatagramSocket socket;
 	private int size;
@@ -45,14 +45,12 @@ public abstract class AThreadDatagramSocket extends AThread {
 		return socket.getPort();
 	}
 	
-	/*
 	public final void connect(InetAddress addr, int port) {
 		if (socket.isConnected()) {
 			socket.disconnect();
 		}
 		socket.connect(addr, port);
 	}
-	*/
 	
 	@Override
 	public void onclose() throws IOException {
