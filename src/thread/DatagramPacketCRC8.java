@@ -1,4 +1,4 @@
-package packet;
+package thread;
 
 import java.net.*;
 import java.util.*;
@@ -12,11 +12,11 @@ import org.junit.*;
  * @author Harri Linna
  * @version 5.12.2020
  */
-public class APacketError extends APacket {
+public class DatagramPacketCRC8 extends ADatagramPacket {
 
 	private static final int[] mask = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 	
-	public APacketError(DatagramPacket packet) {
+	public DatagramPacketCRC8(DatagramPacket packet) {
 		super(packet);
 	}
 	
@@ -38,9 +38,9 @@ public class APacketError extends APacket {
 	
 	// PRIVATE METHODS
 	
-	public static APacketError convertToCRC8(DatagramPacket packet) {
+	public static DatagramPacketCRC8 convertToCRC8(DatagramPacket packet) {
 		byte[] data = encode(packet.getData()); // add CRC8
-		return new APacketError(new DatagramPacket(data, data.length, packet.getAddress(), packet.getPort()));
+		return new DatagramPacketCRC8(new DatagramPacket(data, data.length, packet.getAddress(), packet.getPort()));
 	}
 	
 	private static byte[] encode(byte[] arr) {
@@ -135,7 +135,7 @@ public class APacketError extends APacket {
 			byte[] arr = "testdata".getBytes();
 			
 			DatagramPacket packet = new DatagramPacket(arr, arr.length, null, 0);
-			APacketError error = APacketError.convertToCRC8(packet);
+			DatagramPacketCRC8 error = DatagramPacketCRC8.convertToCRC8(packet);
 			DatagramPacket expect = error.removeCRC8();
 			
 			assertFalse(error.isCorrupted());

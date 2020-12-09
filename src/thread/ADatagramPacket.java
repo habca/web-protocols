@@ -1,4 +1,4 @@
-package packet;
+package thread;
 
 import java.net.*;
 
@@ -7,11 +7,11 @@ import java.net.*;
  * @author Harri Linna
  * @version 26.11.2020
  */
-public abstract class APacket {
+public abstract class ADatagramPacket {
 
 	private DatagramPacket packet;
 	
-	public APacket(DatagramPacket packet) {
+	public ADatagramPacket(DatagramPacket packet) {
 		this.packet = packet;
 	}
 	

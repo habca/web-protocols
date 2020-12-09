@@ -1,4 +1,4 @@
-package packet;
+package thread;
 
 import static org.junit.Assert.*;
 
@@ -18,9 +18,10 @@ import main.*;
  */
 public class DatagramSocketError extends DatagramSocket {
 	
-	private double droprate = 0.0;
-	private double biterror = 0.0;
-	private int delayms = 0; // ms unit
+	private double dropRate = 0.0;
+	private double errorRate = 0.0;
+	private int minDelay = 0; // ms unit
+	private int maxDelay = 0;
 
 	// CONSTRUCTORS
 	
@@ -34,10 +35,11 @@ public class DatagramSocketError extends DatagramSocket {
 	
 	// PUBLIC METHODS
 	
-	public final void setErrorRates(double drop, double error, int delay) {
-		droprate = drop;
-		biterror = error;
-		delayms = delay;
+	public final void setErrorRates(double dropRate, double errorRate, int minDelay, int maxDelay) {
+		this.dropRate = dropRate;
+		this.errorRate = errorRate;
+		this.minDelay = minDelay*1000; // seconds to milliseconds
+		this.maxDelay = maxDelay*1000; // seconds to milliseconds
 	}
 
 	@Override
@@ -48,18 +50,22 @@ public class DatagramSocketError extends DatagramSocket {
 			super.receive(packet);
 
 			// vastaanoton satunnainen viive
-			if (delayms > 0) {
-				Static.sleep(intRange(0, delayms));
+			if (maxDelay > 0) {
+				if (maxDelay - minDelay > 0) {
+					Static.sleep(intRange(minDelay, maxDelay));
+				} else {
+					Static.sleep(maxDelay);
+				}
 			}
 			
 			// pudotetaan satunnainen paketti
-			if (rand.nextDouble() < droprate) {
+			if (rand.nextDouble() < dropRate) {
 				Main.onmessage("Dropped packet");
 				continue;
 			}
 
 			// asetetaan satunnainen bittivirhe
-			if (rand.nextDouble() < biterror) {
+			if (rand.nextDouble() < errorRate) {
 				Main.onmessage("Bit error");
 				generateError(packet);
 			}

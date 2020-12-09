@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 
 import main.*;
-import packet.*;
 
 /**
  * Thread for receiving UDP-packets

@@ -5,7 +5,6 @@ import java.io.*;
 import java.net.*;
 
 import main.*;
-import packet.*;
 
 /**
  * Huom! Älä erehdy käyttämään DatagramSocket.connect() metodia.
@@ -17,7 +16,7 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 
 	private TFTPPacket previous;
 	private FileReaderWriter manager;
-	private ThreadScheduled schedule;
+	private ScheduledThread schedule;
 	
 	private DatagramPacket request;
 	
@@ -25,7 +24,7 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 		super(socket, TFTPPacket.MAX_SIZE);
 		
 		// schedule runs tasks at fixed rate
-		schedule = new ThreadScheduled(1, 2000);
+		schedule = new ScheduledThread(1000, 5000);
 		request = packet;
 		
 		// start the thread
@@ -47,7 +46,7 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 	
 	private void onschedule(TFTPPacket packet) {
 		// include CRC8 checksum to all departing packets
-		APacketError error = APacketError.convertToCRC8(packet.getDatagramPacket());
+		DatagramPacketCRC8 error = DatagramPacketCRC8.convertToCRC8(packet.getDatagramPacket());
 		udpSend(error.getDatagramPacket());
 		
 		schedule.setTask(new Runnable() {
@@ -55,6 +54,13 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 			@Override
 			public void run() {
 				udpSend(error.getDatagramPacket());
+			}
+			
+		}, new Runnable() {
+
+			@Override
+			public void run() {
+				close();
 			}
 			
 		});
@@ -74,7 +80,7 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 			@Override
 			public void run() throws IOException {
 				//APacketError response = new APacketError(udpReceive());
-				APacketError response = new APacketError(request);
+				DatagramPacketCRC8 response = new DatagramPacketCRC8(request);
 				TFTPPacket packet = new TFTPPacket(response);
 				
 				if (!response.isCorrupted()) {
@@ -106,7 +112,7 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 
 			@Override
 			public void run() throws IOException {
-				APacketError response = new APacketError(udpReceive());
+				DatagramPacketCRC8 response = new DatagramPacketCRC8(udpReceive());
 				TFTPPacket packet = new TFTPPacket(response);
 				
 				// received ACK
@@ -139,7 +145,7 @@ public class TFTPServerReceiver extends AThreadDatagramSocket {
 
 			@Override
 			public void run() throws IOException {
-				APacketError response = new APacketError(udpReceive());
+				DatagramPacketCRC8 response = new DatagramPacketCRC8(udpReceive());
 				TFTPPacket packet = new TFTPPacket(response);
 				
 				// received DATA

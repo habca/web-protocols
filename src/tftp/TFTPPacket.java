@@ -6,7 +6,7 @@ import java.util.*;
 
 import ftp.*;
 import main.*;
-import packet.*;
+import thread.*;
 
 import static org.junit.Assert.*;
 
@@ -17,7 +17,7 @@ import org.junit.*;
  * @author Harri Linna
  * @version 5.12.2020
  */
-public class TFTPPacket extends APacket {
+public class TFTPPacket extends ADatagramPacket {
 	
 	// 516 bytes RFC - 4 bytes HEADER - 1 byte CRC8 = 511 bytes DATA
 	public static final int MAX_SIZE = 516; // RFC 1350
@@ -38,7 +38,7 @@ public class TFTPPacket extends APacket {
 		super(packet);
 	}
 	
-	public TFTPPacket(APacketError packet) {
+	public TFTPPacket(DatagramPacketCRC8 packet) {
 		super(packet.removeCRC8());
 	}
 	
@@ -196,8 +196,8 @@ public class TFTPPacket extends APacket {
 			InetSocketAddress none = new InetSocketAddress(0);
 			
 			TFTPPacket send1 = make_data("testdata".getBytes(), 1, none);
-			APacketError send2 = APacketError.convertToCRC8(send1.getDatagramPacket());
-			APacketError receive2 = new APacketError(send2.getDatagramPacket());
+			DatagramPacketCRC8 send2 = DatagramPacketCRC8.convertToCRC8(send1.getDatagramPacket());
+			DatagramPacketCRC8 receive2 = new DatagramPacketCRC8(send2.getDatagramPacket());
 			TFTPPacket receive1 = new TFTPPacket(receive2.removeCRC8());
 			
 			assertTrue(send1.getLength() == send2.getLength() - 1);
@@ -286,7 +286,7 @@ public class TFTPPacket extends APacket {
 			}
 			
 			TFTPPacket test1 = make_data(new byte[MAX_DATA], 0, none);
-			APacketError test2 = APacketError.convertToCRC8(test1.getDatagramPacket());
+			DatagramPacketCRC8 test2 = DatagramPacketCRC8.convertToCRC8(test1.getDatagramPacket());
 			TFTPPacket test3 = new TFTPPacket(test2.removeCRC8());
 			TFTPPacket test4 = new TFTPPacket(test2);
 			

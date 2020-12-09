@@ -5,7 +5,6 @@ import java.net.*;
 
 import fi.jyu.mit.ohj2.Mjonot;
 import main.*;
-import packet.*;
 import thread.*;
 
 /**
@@ -22,7 +21,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 	
 	private TFTPPacket previous;
 	private FileReaderWriter manager;
-	private ThreadScheduled schedule;
+	private ScheduledThread schedule;
 	
 	public TFTPClient(int src_port, InetAddress dst_addr, int dst_port)
 			throws SocketException, UnknownHostException {
@@ -31,7 +30,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 		server = new InetSocketAddress(dst_addr, dst_port);
 		
 		// schedule runs tasks at fixed rate
-		schedule = new ThreadScheduled(1, 2000);
+		schedule = new ScheduledThread(1000, 5000);
 		
 		// start thread
 		new Thread(this).start();
@@ -45,7 +44,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 	
 	private void onschedule(TFTPPacket packet) {
 		// include CRC8 checksum to all the departing packets
-		APacketError error = APacketError.convertToCRC8(packet.getDatagramPacket());
+		DatagramPacketCRC8 error = DatagramPacketCRC8.convertToCRC8(packet.getDatagramPacket());
 		udpSend(error.getDatagramPacket());
 		
 		schedule.setTask(new Runnable() {
@@ -55,6 +54,15 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 				udpSend(error.getDatagramPacket());
 			}
 		
+		}, new Runnable() {
+
+			@Override
+			public void run() {
+				Main.onmessage("Timeout");
+				schedule.cancelTask();
+				setState(onreceive());
+			}
+			
 		});
 	}
 	
@@ -106,7 +114,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 
 			@Override
 			public void run() throws IOException {
-				APacketError response = new APacketError(udpReceive());
+				DatagramPacketCRC8 response = new DatagramPacketCRC8(udpReceive());
 				TFTPPacket packet = new TFTPPacket(response);
 				
 				// received ACK
@@ -129,7 +137,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 
 			@Override
 			public void run() throws IOException {
-				APacketError response = new APacketError(udpReceive());
+				DatagramPacketCRC8 response = new DatagramPacketCRC8(udpReceive());
 				TFTPPacket packet = new TFTPPacket(response);
 				
 				// received DATA
@@ -155,7 +163,7 @@ public class TFTPClient extends AThreadDatagramSocket implements IClient {
 
 			@Override
 			public void run() throws IOException {
-				APacketError response = new APacketError(udpReceive());
+				DatagramPacketCRC8 response = new DatagramPacketCRC8(udpReceive());
 				TFTPPacket packet = new TFTPPacket(response);
 				
 				// received ACK

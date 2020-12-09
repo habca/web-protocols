@@ -3,7 +3,6 @@ package tftp;
 import java.io.*;
 import java.net.*;
 
-import packet.*;
 import thread.*;
 
 /**
@@ -30,7 +29,7 @@ public class TFTPServer extends AThreadDatagramSocket {
 				// create socket to next available port
 				InetSocketAddress addr = new InetSocketAddress(8070); // 8069+1
 				DatagramSocketError socket = new DatagramSocketError(addr);
-				//socket.setErrorRates(0.2, 0.2, 1); // generate errors
+				socket.setErrorRates(0.2, 0.2, 0, 10); // generate errors
 				new TFTPServerReceiver(socket, packet);
 			}
 			
