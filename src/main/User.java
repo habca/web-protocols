@@ -5,6 +5,7 @@ import java.net.*;
 
 import fi.jyu.mit.ohj2.Mjonot;
 import ftp.*;
+import http2.*;
 import imap.*;
 import pop3.*;
 import smtp.*;
@@ -53,7 +54,8 @@ public class User extends AThread {
 						input.startsWith("pop3") ||
 						input.startsWith("imap") ||
 						input.startsWith("ftp") ||
-						input.startsWith("tftp")) {
+						input.startsWith("tftp") ||
+						input.startsWith("http")) {
 					parseClient(input);
 					return;
 				}
@@ -104,6 +106,12 @@ public class User extends AThread {
 		if (protocol.equals(TFTPClient.PROTOCOL)) {
 			client.close();
 			client = new TFTPClient(8071, addr, port); // 8069+2
+			return true;
+		}
+		
+		if (protocol.equals(HTTP2Client.PROTOCOL)) {
+			client.close();
+			client = new HTTP2Client(addr, port);
 			return true;
 		}
 		

@@ -1,0 +1,66 @@
+             Hypertext Transfer Protocol Version 2 (HTTP/2)
+             
+3.  Starting HTTP/2
+
+   An HTTP/2 connection is an application-layer protocol running on top
+   of a TCP connection ([TCP]).  The client is the TCP connection
+   initiator.
+   
+   HTTP/2 uses the same "http" and "https" URI schemes used by HTTP/1.1.
+   HTTP/2 shares the same default port numbers: 80 for "http" URIs and
+   443 for "https" URIs.  As a result, implementations processing
+   requests for target resource URIs like "http://example.org/foo" or
+   "https://example.com/bar" are required to first discover whether the
+   upstream server (the immediate peer to which the client wishes to
+   establish a connection) supports HTTP/2.
+   
+3.2.  Starting HTTP/2 for "http" URIs
+
+   A client that makes a request for an "http" URI without prior
+   knowledge about support for HTTP/2 on the next hop uses the HTTP
+   Upgrade mechanism (Section 6.7 of [RFC7230]).  The client does so by
+   making an HTTP/1.1 request that includes an Upgrade header field with
+   the "h2c" token.  Such an HTTP/1.1 request MUST include exactly one
+   HTTP2-Settings (Section 3.2.1) header field.
+
+   For example:
+
+     GET / HTTP/1.1
+     Host: server.example.com
+     Connection: Upgrade, HTTP2-Settings
+     Upgrade: h2c
+     HTTP2-Settings: <base64url encoding of HTTP/2 SETTINGS payload>
+     
+   Requests that contain a payload body MUST be sent in their entirety
+   before the client can send HTTP/2 frames.  This means that a large
+   request can block the use of the connection until it is completely
+   sent.
+   
+   A server MUST ignore an "h2" token in an Upgrade header field.
+   Presence of a token with "h2" implies HTTP/2 over TLS, which is
+   instead negotiated as described in Section 3.3.
+   
+   A server that supports HTTP/2 accepts the upgrade with a 101
+   (Switching Protocols) response.  After the empty line that terminates
+   the 101 response, the server can begin sending HTTP/2 frames.  These
+   frames MUST include a response to the request that initiated the
+   upgrade.
+
+   For example:
+
+     HTTP/1.1 101 Switching Protocols
+     Connection: Upgrade
+     Upgrade: h2c
+     
+   The first HTTP/2 frame sent by the server MUST be a server connection
+   preface (Section 3.5) consisting of a SETTINGS frame (Section 6.5).
+   Upon receiving the 101 response, the client MUST send a connection
+   preface (Section 3.5), which includes a SETTINGS frame.
+
+   The HTTP/1.1 request that is sent prior to upgrade is assigned a
+   stream identifier of 1 (see Section 5.1.1) with default priority
+   values (Section 5.3.5).  Stream 1 is implicitly "half-closed" from
+   the client toward the server (see Section 5.1), since the request is
+   completed as an HTTP/1.1 request.  After commencing the HTTP/2
+   connection, stream 1 is used for the response.
+   
