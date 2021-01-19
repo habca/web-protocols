@@ -136,6 +136,7 @@ public class User extends AThread {
 						"imap localhost 8143\n" +
 						"ftp <host> <port>\n" +
 						"tftp localhost 8069\n" +
+						"http <host> <port>\n" +
 						"help\n" +
 						"quit"
 				);

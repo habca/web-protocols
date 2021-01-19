@@ -32,7 +32,7 @@ public class Main {
 			new POP3Server(8110, inbox);
 			new IMAPServer(8143, inbox);
 			new TFTPServer(8069);
-			new HTTP2Server(8080);
+			//new HTTP2Server(8080);
 			new User(System.in);
 		} catch (IOException e) {
 			Main.onerror(e);

@@ -8,7 +8,7 @@ import thread.*;
 /**
  * Simple HTTP/2 Server for TIES323
  * @author Harri Linna
- * @version 13.12.2020
+ * @version 13.12.2020, 1h RFC aloittaminen, serverin ja asiakkaan runko
  */
 public class HTTP2ServerReceiver extends AThreadSocket {
 
