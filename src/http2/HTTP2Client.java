@@ -13,7 +13,10 @@ import thread.*;
  * TODO: etsi testi palvelin
  * 
  * @author Harri Linna
- * @version 13.12.2020, 1h RFC aloittaminen, serverin ja asiakkaan runko
+ * @version 13.12.2020, 1h RFC lukemista lukuun 3.2 asti. Palvelimen ja asiakkaan alustus.
+ * @version 18.1.2021, 1h 30min RFC lukemista 4. lukuun asti
+ * @version 19.1.2021, 1h Upgrade h2c ei toimi. Palvelin vastaa HTTP/1.1 200 OK
+ * @version 20.1.2021, 2h 40min HTTP2 testipalvelimen etsimistä. HTTP2 testiasiakas löydetty.
  */
 public class HTTP2Client extends AThreadSocket implements IClient {
 	
