@@ -72,7 +72,7 @@ public final class Static {
 	
 	public static final void sleep(int milliseconds) {
 		try {
-			Thread.sleep((long) milliseconds);
+			Thread.sleep(milliseconds);
 		} catch (InterruptedException e) {
 			Main.onerror(e);
 		}

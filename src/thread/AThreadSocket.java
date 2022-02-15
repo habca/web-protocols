@@ -35,7 +35,7 @@ public abstract class AThreadSocket extends AThread {
 	
 	public final void tcpSend(String str) {
 		try {
-			Thread.sleep((long) 100); // sync delay
+			Thread.sleep(100); // sync delay
 			OutputStream out = socket.getOutputStream();
 			PrintWriter printer = new PrintWriter(out, true);
 			printer.println(str);

@@ -144,7 +144,7 @@ public class User extends AThread {
 
 			@Override
 			public void close() {
-				
+				//
 			}
 
 			@Override
